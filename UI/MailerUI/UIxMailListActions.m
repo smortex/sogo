@@ -32,6 +32,7 @@
 #import <Foundation/NSTimeZone.h>
 #import <Foundation/NSUserDefaults.h> /* for locale string constants */
 #import <Foundation/NSValue.h>
+#import <Foundation/NSNumberFormatter.h>
 
 #import <NGObjWeb/WOApplication.h>
 #import <NGObjWeb/WOContext+SoObjects.h>
@@ -340,7 +341,6 @@
                           && [[currentPart objectForKey:@"disposition"] objectForKey:@"type"] 
                           && [[[[currentPart objectForKey:@"disposition"] objectForKey:@"type"] uppercaseString] isEqualToString:@"INLINE"];
             isImage = [SOGoMailBodyPart bodyPartClassForMimeType: [contentType lowercaseString] inContext: [self context]] == [SOGoImageMailBodyPart class];
-            id foo = [SOGoMailBodyPart bodyPartClassForMimeType: [contentType lowercaseString] inContext: [self context]];
             
 
             if (![ud hideInlineAttachments] || ([ud hideInlineAttachments] && !(isInline && isImage))) {
@@ -472,8 +472,10 @@
   WORequest *request;
   NSDictionary *sortingAttributes, *content, *filter;
   NSArray *filters, *labels;
-  NSString *searchBy, *searchInput, *searchString, *match, *label;
+  NSString *searchBy, *searchInput, *searchString, *match, *label, *operator, *sizeUnit;
   NSMutableArray *qualifiers, *searchArray, *labelQualifiers;
+  NSNumberFormatter *formatter;
+  NSNumber *size;
   BOOL unseenOnly, flaggedOnly;
   int max, i;
   
@@ -498,12 +500,39 @@
             filter = [filters objectAtIndex:i];
             searchBy = [filter objectForKey: @"searchBy"];
             searchInput = [filter objectForKey: @"searchInput"];
+            
             if (searchBy && searchInput)
               {
-                if ([[filter objectForKey: @"negative"] boolValue])
-                  searchString = [NSString stringWithFormat: @"(not (%@ doesContain: '%@'))", searchBy, searchInput];
-                else
+                // Size
+                if ([searchBy isEqualToString: @"size"]) {
+                  operator = [filter objectForKey: @"operator"];
+                  sizeUnit = [filter objectForKey: @"sizeUnit"];
+                  formatter = [[NSNumberFormatter alloc] init];
+                  formatter.numberStyle = NSNumberFormatterDecimalStyle;
+                  size = [formatter numberFromString: searchInput];
+                  [formatter release];
+                  if ([[sizeUnit lowercaseString] isEqualToString: @"kb"]) {
+                    size = [NSNumber numberWithLongLong: [size longLongValue] * 1000];
+                  } else if ([[sizeUnit lowercaseString] isEqualToString: @"mb"]) {
+                    size = [NSNumber numberWithLongLong: [size longLongValue] * 1000000];
+                  } else if ([[sizeUnit lowercaseString] isEqualToString: @"gb"]) {
+                    size = [NSNumber numberWithLongLong: [size longLongValue] * 1000000000];
+                  }
+                  
+                  searchString = [NSString stringWithFormat: @"(%@ %@ %@)", searchBy, operator, [size stringValue]];
+                } else if ([searchBy isEqualToString: @"date"]) {
+                  operator = [filter objectForKey: @"operator"];
+                  searchString = [NSString stringWithFormat: @"(%@ %@ (NSCalendarDate)\"%@\")", searchBy, operator, searchInput];
+                } else if ([searchBy isEqualToString: @"attachment"]) {
+                  searchString = [NSString stringWithFormat: @"(HAS ATTACH)"];
+                } else {
+                  // Others
                   searchString = [NSString stringWithFormat: @"(%@ doesContain: '%@')", searchBy, searchInput];
+                }
+
+                if ([[filter objectForKey: @"negative"] boolValue])
+                  searchString = [NSString stringWithFormat: @"(not %@)", searchString];
+                
 
                 searchQualifier = [EOQualifier qualifierWithQualifierFormat: searchString];
                 if (searchQualifier)

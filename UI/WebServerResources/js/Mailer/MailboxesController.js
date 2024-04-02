@@ -18,14 +18,32 @@
       this.accounts = stateAccounts;
 
       // Advanced search options
-      this.currentSearchParam = '';
+      this.searchForm = {
+        from: '',
+        to: '',
+        contains: '',
+        notContains: '',
+        subject: '',
+        body: '',
+        date: 'anytime',
+        dateStart: new Date(),
+        dateEnd: new Date(),
+        bcc: '',
+        size: '',
+        sizeOperator: '>',
+        sizeUnit: 'mb',
+        attachements: 1,
+      };
       this.search = {
         options: {'': '',  // no placeholder when no criteria is active
                   subject: l('Enter Subject'),
                   from:    l('Enter From'),
                   to:      l('Enter To'),
                   cc:      l('Enter Cc'),
-                  body:    l('Enter Body')
+                  bcc:     l('Enter Bcc'),
+                  body:    l('Enter Body'),
+                  size:    l('Enter Size'),
+                  date:    l('Enter Date'),
                  },
         subfolders: 1,
         match: 'AND',
@@ -75,8 +93,91 @@
 
       account = vm.accounts[0];
       mailbox = vm.searchPreviousMailbox;
-      $state.go('mail.account.mailbox', { accountId: account.id, mailboxId: encodeUriFilter(mailbox.path) });
+      if (mailbox)
+        $state.go('mail.account.mailbox', { accountId: account.id, mailboxId: encodeUriFilter(mailbox.path) });
     };
+
+    this.addSearchParameters = function() {
+      this.search.params = [];
+      // From
+      if (this.searchForm.from && this.searchForm.from.length > 0) {
+        this.search.params.push(this.newSearchParam('from', this.searchForm.from));
+      }
+      // To
+      if (this.searchForm.to && this.searchForm.to.length > 0) {
+        this.search.params.push(this.newSearchParam('to', this.searchForm.to));
+      }
+      // Bcc
+      if (this.searchForm.bcc && this.searchForm.bcc.length > 0) {
+        this.search.params.push(this.newSearchParam('bcc', this.searchForm.bcc));
+      }
+      // Contains
+      if (this.searchForm.contains && this.searchForm.contains.length > 0) {
+        this.search.params.push(this.newSearchParam('subject', this.searchForm.contains));
+        this.search.params.push(this.newSearchParam('body', this.searchForm.contains));
+        this.search.match = 'OR';
+      }
+      // Does not contains
+      if (this.searchForm.doesnotcontains && this.searchForm.doesnotcontains.length > 0) {
+        this.search.params.push(this.newSearchParam('subject', '!' + this.searchForm.doesnotcontains));
+        this.search.params.push(this.newSearchParam('body', '!' + this.searchForm.doesnotcontains));
+        this.search.match = 'AND';
+      }
+      // Subject
+      if (this.searchForm.subject && this.searchForm.subject.length > 0) {
+        this.search.params.push(this.newSearchParam('subject', this.searchForm.subject));
+      }
+      // Body
+      if (this.searchForm.body && this.searchForm.body.length > 0) {
+        this.search.params.push(this.newSearchParam('body', this.searchForm.body));
+      }
+      // Date
+      if (this.searchForm.date && this.searchForm.date.length > 0) {
+        var date = null;
+        var today = new Date();
+        var tmp = new Date(today);
+        switch (this.searchForm.date) {
+          case 'anytime':
+            break;
+          case 'last7days':
+            tmp.setDate(tmp.getDate() - 7);
+            date = this.formatDate(tmp);
+            this.search.params.push(this.newSearchParam('date', date, '>='));
+            break;
+          case 'last30days':
+            tmp.setDate(tmp.getDate() - 30);
+            date = this.formatDate(tmp);
+            this.search.params.push(this.newSearchParam('date', date, '>='));
+            break;
+          case 'last6month':
+            tmp.setMonth(tmp.getMonth() - 6);
+            date = this.formatDate(tmp);
+            this.search.params.push(this.newSearchParam('date', date, '>='));
+            break;
+          case 'before':
+            date = this.formatDate(this.searchForm.dateStart);
+            this.search.params.push(this.newSearchParam('date', date, '<'));
+            break;
+          case 'after':
+            date = this.formatDate(this.searchForm.dateStart);
+            this.search.params.push(this.newSearchParam('date', date, '>='));
+            break;
+          case 'between':
+            date = this.formatDate(this.searchForm.dateStart);
+            this.search.params.push(this.newSearchParam('date', date, '>='));
+            date = this.formatDate(this.searchForm.dateEnd);
+            this.search.params.push(this.newSearchParam('date', date, '<'));
+            this.search.match = 'AND';
+            break;
+        }
+      }
+      // Size
+      if (this.searchForm.size && this.searchForm.size.length > 0) {
+        this.search.params.push(this.newSearchParam('size', this.searchForm.size, this.searchForm.sizeOperator));
+      }
+
+      this.toggleAdvancedSearch();
+    }
 
     this.toggleAdvancedSearch = function() {
       if (Mailbox.selectedFolder.$isLoading) {
@@ -126,22 +227,56 @@
       }
     };
 
-    this.addSearchParam = function(v) {
-      this.currentSearchParam = v;
-      focus('advancedSearch');
-      return false;
+  
+    this.formatDate = function(date) {
+      var year = date.getFullYear();
+      var month = (date.getMonth() + 1).toString().padStart(2, '0');
+      var day = date.getDate().toString().padStart(2, '0');
+      return year + '-' + month + '-' + day;
     };
 
-    this.newSearchParam = function(pattern) {
-      if (pattern.length && this.currentSearchParam.length) {
-        var n = 0, searchParam = this.currentSearchParam;
+    this.changeDate = function() {
+      if ('between' == this.searchForm.date) {
+        if (this.searchForm.dateStart > this.searchForm.dateEnd) {
+          this.searchForm.dateEnd = this.searchForm.dateStart;
+        }
+      }
+    };
+
+    this.newSearchParam = function (searchParam, pattern, operator = '>') {
+      if (pattern.length && searchParam.length) {
+        var n = 0;
         if (pattern.startsWith("!")) {
           n = 1;
           pattern = pattern.substring(1).trim();
         }
-        this.currentSearchParam = '';
-        return { searchBy: searchParam, searchInput: pattern, negative: n };
+
+        switch (searchParam) {
+          case 'size':
+            return { searchBy: searchParam, searchInput: pattern, negative: n, operator: operator, sizeUnit: this.searchForm.sizeUnit };
+          case 'date':
+            return { searchBy: searchParam, searchInput: pattern, negative: n, operator: operator };
+          default:
+            return { searchBy: searchParam, searchInput: pattern, negative: n };
+        }
       }
+    };
+
+    this.searchForm = {
+      from: '',
+      to: '',
+      contains: '',
+      notContains: '',
+      subject: '',
+      body: '',
+      date: '',
+      dateStart: new Date(),
+      dateEnd: new Date(),
+      bcc: '',
+      size: '',
+      sizeOperator: '>',
+      sizeUnit: 'mb',
+      attachements: 1,
     };
 
     this.toggleAccountState = function (account) {

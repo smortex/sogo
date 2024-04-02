@@ -18,8 +18,36 @@ md-toolbar {
   transition-duration: 0s;
 }
 
-.md-toolbar-tools {
+.md-toolbar-tools, .md-toolbar-tools .md-datepicker-input {
   font-size: $subhead-font-size-base;
+}
+
+.md-toolbar-tools md-select:not([disabled]):focus .md-select-value {
+  border-bottom-color: unset;
+  color: unset;
+  border-bottom-width: 1px;
+}
+
+.search-right-space {
+  margin-right: 10px!important;
+  padding-right: 0px;
+}
+
+.search-and {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 12px;
+}
+
+.search-inline {
+  display: flex;
+  justify-content: center;
+}
+
+.md-toolbar-tools .md-datepicker-input {
+  color: rgba(255, 255, 255, 0.87); // {{primary-contrast}}
+  margin-top: 5px;
 }
 
 md-toolbar,
@@ -143,6 +171,35 @@ hgroup {
 .sg-toolbar-tools--dense {
   min-height: $bl * 6;
   height: $bl * 6;
+}
+
+.advanced-search {
+  flex-direction: column;
+  align-items: baseline;
+}
+
+.advanced-search {
+  flex-direction: column;
+  align-items: baseline;
+}
+
+.advanced-search-full {
+  width: 100%;
+}
+
+.advanced-search md-input-container, .advanced-search md-select, .advanced-search md-datepicker, .advanced-search .search-and  {
+  margin: 10px 0;
+  padding: 2px;
+}
+
+.advanced-search md-checkbox.md-checked .md-icon {
+  background-color: rgba(255, 255, 255, 0.37);
+}
+
+.search-inline md-menu, .search-inline button {
+  height: auto!important;
+  margin: auto!important;
+  padding: 0!important;
 }
 
 //.sg-toolbar-search {

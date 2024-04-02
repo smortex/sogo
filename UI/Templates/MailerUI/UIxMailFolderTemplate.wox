@@ -8,58 +8,180 @@
     <!-- in virtual mailbox mode -->
     <md-toolbar class="md-whiteframe-z1 md-hue-3"
                 ng-hide="mailbox.service.$virtualPath === false || mailbox.mode.multiple">
-      <div class="md-toolbar-tools"
-         layout="row" layout-align="start start">
-        <div class="pseudo-input-container pseudo-input-container--compact md-flex sg-no-wrap">
-          <label class="pseudo-input-label pseudo-input-label">
-            <var:string label:value="Search messages in"/>
-          </label>
-          <md-select class="pseudo-input-field" label:aria-label="Search messages in" ng-model="mailbox.service.$virtualPath">
-            <md-option ng-value="''">
-              <span ng-bind="app.accounts[0].name"><!-- main account name --></span>
-            </md-option>
-            <md-option ng-repeat="folder in
-                                  app.accounts[0].$flattenMailboxes()
-                                  track by folder.path"
-                       ng-value="folder.path">
-              <span ng-class="'sg-child-level-' + folder.level"
-                    ng-bind="folder.$displayName"><!-- mailbox name --></span>
-            </md-option>
-          </md-select>
-        </div>
-        <md-menu>
-          <md-button class="sg-icon-button" label:aria-label="More search options" ng-click="$mdMenu.open()">
-            <md-icon>settings</md-icon>
-          </md-button>
-          <md-menu-content>
-            <md-menu-item>
-              <sg-checkmark ng-model="app.search.subfolders"
-                            sg-true-value="1"
-                            sg-false-value="0">
-                <var:string label:value="Search subfolders"/>
-              </sg-checkmark>
-            </md-menu-item>
-            <md-menu-divider><!-- divider --></md-menu-divider>
-            <md-menu-item>
-              <md-button ng-click="app.search.match='AND'">
-                <md-icon label:aria-label="Match all of the following">{{ app.search.match == 'AND' ? 'check' : null }}</md-icon>
-                <var:string label:value="Match all of the following"/>
+
+       <div class="md-toolbar-tools sg-toolbar-auto advanced-search">
+
+         <md-input-container class="advanced-search-full">
+            <label><var:string label:value="From"/></label>
+            <input type="text" var:value="app.searchForm.from" ng-model="app.searchForm.from" />
+          </md-input-container>
+
+          <md-input-container class="advanced-search-full">
+            <label><var:string label:value="To"/></label>
+            <input type="text" var:value="app.searchForm.to"  ng-model="app.searchForm.to"/>
+          </md-input-container>
+
+          <md-input-container class="advanced-search-full">
+            <label><var:string label:value="Contains"/></label>
+            <input type="text" var:value="app.searchForm.contains" ng-model="app.searchForm.contains"/>
+          </md-input-container>
+
+          <md-input-container class="advanced-search-full">
+            <label><var:string label:value="Does not contains"/></label>
+            <input type="text" var:value="app.searchForm.doesnotcontains" ng-model="app.searchForm.doesnotcontains"/>
+          </md-input-container>
+
+          <md-input-container class="advanced-search-full">
+            <label><var:string label:value="Subject"/></label>
+            <input type="text" var:value="app.searchForm.subject" ng-model="app.searchForm.subject"/>
+          </md-input-container>
+
+          <md-input-container class="advanced-search-full">
+            <label><var:string label:value="Body"/></label>
+            <input type="text" var:value="app.searchForm.body" ng-model="app.searchForm.body"/>
+          </md-input-container>
+
+          <div class="search-inline">
+            <md-select ng-model="app.searchForm.date"  class="search-right-space">
+                <md-option value="anytime">
+                  <var:string label:value="Anytime"/>
+                </md-option>
+                <md-option value="last7days">
+                  <var:string label:value="Last 7 days"/>
+                </md-option>
+                <md-option value="last30days">
+                  <var:string label:value="Last 30 days"/>
+                </md-option>
+                <md-option value="last6month">
+                  <var:string label:value="Last 6 month"/>
+                </md-option>
+                <md-option value="before">
+                  <var:string label:value="Before"/>
+                </md-option>
+                <md-option value="after">
+                  <var:string label:value="After"/>
+                </md-option>
+                <md-option value="between">
+                  <var:string label:value="Between"/>
+                </md-option>
+            </md-select>
+
+            <md-datepicker class="md-text search-right-space" 
+              ng-model="app.searchForm.dateStart"
+              md-hide-icons="calendar"
+              ng-change="app.changeDate()"
+              ng-show="['before', 'after', 'between'].indexOf(app.searchForm.date) != -1">
+            </md-datepicker>
+
+            <div class="search-right-space search-and" ng-show="['between'].indexOf(app.searchForm.date) != -1">
+              <var:string label:value="and"/>
+            </div>
+
+            <md-datepicker class="md-text search-right-space " 
+              ng-model="app.searchForm.dateEnd"
+              md-hide-icons="calendar"
+              ng-change="app.changeDate()"
+              ng-show="['between'].indexOf(app.searchForm.date) != -1">
+            </md-datepicker>
+          </div>
+
+          <md-input-container class="advanced-search-full">
+            <label><var:string label:value="Bcc"/></label>
+            <input type="text" var:value="app.searchForm.bcc" ng-model="app.searchForm.bcc"/>
+          </md-input-container>
+
+          <div class="search-inline">
+            <md-input-container class="md-text search-right-space">
+              <label><var:string label:value="Size"/></label>
+              <input type="text" var:value="app.searchForm.size" ng-model="app.searchForm.size"/>
+            </md-input-container>
+
+            <md-select ng-model="app.searchForm.sizeOperator" class="search-right-space">
+                <md-option value="&gt;">
+                  &gt;
+                </md-option>
+                <md-option value="&lt;">
+                  &lt;
+                </md-option>
+            </md-select>
+            <md-select ng-model="app.searchForm.sizeUnit" class="search-right-space">
+                <md-option value="kb">
+                  <var:string label:value="Kb"/>
+                </md-option>
+                <md-option value="mb">
+                  <var:string label:value="Mb"/>
+                </md-option>
+                <md-option value="gb">
+                  <var:string label:value="Gb"/>
+                </md-option>
+            </md-select>
+          </div>
+
+
+          <md-checkbox
+                        ng-model="app.searchForm.attachements"
+                        ng-true-value="1"
+                        ng-false-value="0"
+                        label:aria-label="With attachments">
+            <var:string label:value="With attachments"/>
+          </md-checkbox>
+
+
+
+
+          <div class="search-inline advanced-search-full"
+                ng-hide="mailbox.service.$virtualPath === false || mailbox.mode.multiple">
+     
+              <div class="pseudo-input-container pseudo-input-container--compact md-flex sg-no-wrap">
+                <label class="pseudo-input-label pseudo-input-label">
+                  <var:string label:value="Search messages in"/>
+                </label>
+                <md-select class="pseudo-input-field" label:aria-label="Search messages in" ng-model="mailbox.service.$virtualPath">
+                  <md-option ng-value="''">
+                    <span ng-bind="app.accounts[0].name"><!-- main account name --></span>
+                  </md-option>
+                  <md-option ng-repeat="folder in
+                                        app.accounts[0].$flattenMailboxes()
+                                        track by folder.path"
+                            ng-value="folder.path">
+                    <span ng-class="'sg-child-level-' + folder.level"
+                          ng-bind="folder.$displayName"><!-- mailbox name --></span>
+                  </md-option>
+                </md-select>
+              </div>
+              <md-menu>
+                <md-button class="sg-icon-button" label:aria-label="More search options" ng-click="$mdMenu.open()">
+                  <md-icon>settings</md-icon>
+                </md-button>
+                <md-menu-content>
+                  <md-menu-item>
+                    <sg-checkmark ng-model="app.search.subfolders"
+                                  sg-true-value="1"
+                                  sg-false-value="0">
+                      <var:string label:value="Search subfolders"/>
+                    </sg-checkmark>
+                  </md-menu-item>
+                  <md-menu-divider><!-- divider --></md-menu-divider>
+                  <md-menu-item>
+                    <md-button ng-click="app.search.match='AND'">
+                      <md-icon label:aria-label="Match all of the following">{{ app.search.match == 'AND' ? 'check' : null }}</md-icon>
+                      <var:string label:value="Match all of the following"/>
+                    </md-button>
+                  </md-menu-item>
+                  <md-menu-item>
+                    <md-button ng-click="app.search.match='OR'">
+                      <md-icon label:aria-label="Match any of the following">{{ app.search.match == 'OR' ? 'check' : null }}</md-icon>
+                      <var:string label:value="Match any of the following"/>
+                    </md-button>
+                  </md-menu-item>
+                </md-menu-content>
+              </md-menu>
+              <md-button class="sg-icon-button"
+                        label:aria-label="Search"
+                        ng-click="app.addSearchParameters()">
+                <md-icon>{{ app.service.selectedFolder.$isLoading ? 'stop' : 'search' }}</md-icon>
               </md-button>
-            </md-menu-item>
-            <md-menu-item>
-              <md-button ng-click="app.search.match='OR'">
-                <md-icon label:aria-label="Match any of the following">{{ app.search.match == 'OR' ? 'check' : null }}</md-icon>
-                <var:string label:value="Match any of the following"/>
-              </md-button>
-            </md-menu-item>
-          </md-menu-content>
-        </md-menu>
-        <md-button class="sg-icon-button"
-                   label:aria-label="Search"
-                   ng-click="app.toggleAdvancedSearch()"
-                   ng-disabled="app.search.params.length == 0">
-          <md-icon>{{ app.service.selectedFolder.$isLoading ? 'stop' : 'search' }}</md-icon>
-        </md-button>
+          </div>
       </div>
     </md-toolbar>
     <!-- single-selection toolbars -->
