@@ -471,13 +471,13 @@
   EOQualifier *qualifier, *notDeleted, *searchQualifier;
   WORequest *request;
   NSDictionary *sortingAttributes, *content, *filter;
-  NSArray *filters, *labels;
-  NSString *searchBy, *searchInput, *searchString, *match, *label, *operator, *sizeUnit;
+  NSArray *filters, *labels, *searchInputSplit;
+  NSString *searchBy, *searchInput, *searchString, *match, *label, *operator, *sizeUnit, *dateFrom, *dateTo;
   NSMutableArray *qualifiers, *searchArray, *labelQualifiers;
   NSNumberFormatter *formatter;
   NSNumber *size;
   BOOL unseenOnly, flaggedOnly;
-  int max, i;
+  int max, i, j;
   
   request = [context request];
   content = [[request contentAsString] objectFromJSONString];
@@ -523,8 +523,68 @@
                 } else if ([searchBy isEqualToString: @"date"]) {
                   operator = [filter objectForKey: @"operator"];
                   searchString = [NSString stringWithFormat: @"(%@ %@ (NSCalendarDate)\"%@\")", searchBy, operator, searchInput];
+                } else if ([searchBy isEqualToString: @"date_between"]) {
+                  dateFrom = [filter objectForKey: @"dateFrom"];
+                  dateTo = [filter objectForKey: @"dateTo"];
+                  searchString = [NSString stringWithFormat: @"(date >= (NSCalendarDate)\"%@\" AND date <= (NSCalendarDate)\"%@\")", dateFrom, dateTo];
+                  
                 } else if ([searchBy isEqualToString: @"attachment"]) {
-                  searchString = [NSString stringWithFormat: @"(HAS ATTACH)"];
+                  // Not possible with imap search, check in getUIDsInFolder method
+                  // The attachments must be checked in headers
+                  searchString = [NSString stringWithFormat: @"(size > 0)"];
+                } else if ([searchBy isEqualToString: @"favorite"]) {
+                  flaggedOnly = YES;
+                  searchString = [NSString stringWithFormat: @"(size > 0)"];
+                } else if ([searchBy isEqualToString: @"unseen"]) {
+                  unseenOnly = YES;
+                  searchString = [NSString stringWithFormat: @"(size > 0)"];
+                } else if ([searchBy isEqualToString: @"contains"]) {
+                  // Split on space to check each word
+                  searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
+                  searchInputSplit = [searchInput componentsSeparatedByString:@" "];
+                  if ([searchInputSplit count] > 1) {
+                    searchString = @"(";
+                    j = 0;
+                    for (searchInput in searchInputSplit) {
+                      if (j > 0) {
+                        searchString = [NSString stringWithFormat: @"%@ OR", searchString];
+                      }
+                      
+                      searchString = [NSString stringWithFormat: @"%@ (subject doesContain: '%@' OR body doesContain: '%@')", 
+                      searchString, searchInput, searchInput];
+                      j++;
+                    }
+                    searchString = [NSString stringWithFormat: @"%@)", searchString];
+                  } else {
+                    searchString = [NSString stringWithFormat: @"(subject doesContain: '%@' OR body doesContain: '%@')", 
+                      searchInput, searchInput];
+                  }
+                  
+                } else if ([searchBy isEqualToString: @"not_contains"]) {
+                  searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
+                  searchString = [NSString stringWithFormat: @"(NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
+                  searchInput, searchInput];
+
+                  // Split on space to check each word
+                  searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
+                  searchInputSplit = [searchInput componentsSeparatedByString:@" "];
+                  if ([searchInputSplit count] > 1) {
+                    searchString = @"(";
+                    j = 0;
+                    for (searchInput in searchInputSplit) {
+                      if (j > 0) {
+                        searchString = [NSString stringWithFormat: @"%@ AND", searchString];
+                      }
+                      
+                      searchString = [NSString stringWithFormat: @"%@ (NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
+                      searchString, searchInput, searchInput];
+                      j++;
+                    }
+                    searchString = [NSString stringWithFormat: @"%@)", searchString];
+                  } else {
+                    searchString = [NSString stringWithFormat: @"(NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
+                      searchInput, searchInput];
+                  }
                 } else {
                   // Others
                   searchString = [NSString stringWithFormat: @"(%@ doesContain: '%@')", searchBy, searchInput];
@@ -749,13 +809,24 @@
 - (NSDictionary *) getUIDsInFolder: (SOGoMailFolder *) folder
                        withHeaders: (BOOL) includeHeaders
 {
+  return [self getUIDsInFolder: folder
+                   withHeaders: includeHeaders
+               onlyAttachments: NO];
+}
+
+- (NSDictionary *) getUIDsInFolder: (SOGoMailFolder *) folder
+                       withHeaders: (BOOL) includeHeaders
+                   onlyAttachments: (BOOL) onlyAttachments
+{
   NSArray *uids, *threadedUids, *headers;
   NSMutableDictionary *data;
+  NSMutableArray *tmpHeaders, *tmpUids;
+  NSNumber *uid;
   SOGoMailAccount *account;
   id quota;
 
   NSRange r;
-  int count;
+  int count, i, j;
 
   data = [NSMutableDictionary dictionary];
 
@@ -796,6 +867,30 @@
       r = NSMakeRange(0, count);
       headers = [self getHeadersForUIDs: [a subarrayWithRange: r]
                                inFolder: folder];
+
+      // This part is used to filter attachements when searching
+      // There is no way to filter only attachments when using imap SEARCH
+      if (onlyAttachments) {
+        tmpHeaders = [NSMutableArray arrayWithArray: headers];
+        tmpUids = [NSMutableArray arrayWithArray: uids];
+        
+        for (i = ([tmpHeaders count] - 1); i > 0; i--) {
+          // Search for no attachment
+          if (0 == [[[tmpHeaders objectAtIndex: i] objectAtIndex: 1] intValue]) {
+            uid = [[tmpHeaders objectAtIndex: i] objectAtIndex: 10]; // Uid
+            [tmpHeaders removeObjectAtIndex: i];
+
+            for (j = ([tmpUids count] - 1); j >= 0; j--) {
+              if ([uid isEqual: [tmpUids objectAtIndex: j]]) {
+                [tmpUids removeObjectAtIndex: j]; // -1 for header
+              }
+            }
+          }
+        }
+        headers = [tmpHeaders copy];
+        uids = [tmpUids copy];
+      }
+
       [data setObject: headers forKey: @"headers"];
     }
 
@@ -808,6 +903,7 @@
       else
         sortByThread = NO;
     }
+
   if (uids != nil)
     [data setObject: uids forKey: @"uids"];
   [data setObject: [NSNumber numberWithBool: sortByThread] forKey: @"threaded"];
@@ -875,8 +971,8 @@
  */
 - (id <WOActionResults>) getUIDsAction
 {
-  BOOL noHeaders;
-  NSDictionary *data, *requestContent;
+  BOOL noHeaders, onlyAttachments;
+  NSDictionary *data, *requestContent, *filter;
   SOGoMailFolder *folder;
   WORequest *request;
   WOResponse *response;
@@ -887,8 +983,21 @@
   folder = [self clientObject];
   
   noHeaders = [[[requestContent objectForKey: @"sortingAttributes"] objectForKey: @"noHeaders"] boolValue];
+  
+  
+  onlyAttachments = NO;
+  if (requestContent 
+      && [requestContent objectForKey: @"filters"]
+      && [[requestContent objectForKey: @"filters"] count] > 0) {
+        for (filter in [requestContent objectForKey: @"filters"]) {
+          if ([filter objectForKey: @"searchBy"]
+              && [[filter objectForKey: @"searchBy"] isEqualToString: @"attachment"])
+              onlyAttachments = YES;
+        }
+  }
   data = [self getUIDsInFolder: folder
-                   withHeaders: !noHeaders];
+                   withHeaders: !noHeaders
+               onlyAttachments: onlyAttachments];
 
   if (data != nil)
     response = [self responseWithStatus: 200 andJSONRepresentation: data];
@@ -1089,13 +1198,14 @@
 
           // UID
           [msg addObject: [message objectForKey: @"uid"]];
-          [headers addObject: msg];
 
           // isAnswered
           [msg addObject: [NSNumber numberWithBool: [self isMessageAnswered]]];
 
           // isForwarded
           [msg addObject: [NSNumber numberWithBool: [self isMessageForwarded]]];
+
+          [headers addObject: msg];
       
           [self setMessage: [msgsList nextObject]];
 

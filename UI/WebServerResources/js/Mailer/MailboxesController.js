@@ -32,7 +32,9 @@
         size: '',
         sizeOperator: '>',
         sizeUnit: 'mb',
-        attachements: 1,
+        attachements: 0,
+        favorite: 0,
+        unseen: 0,
       };
       this.search = {
         options: {'': '',  // no placeholder when no criteria is active
@@ -49,6 +51,7 @@
         match: 'AND',
         params: []
       };
+      this.showAdditionalParameters = false;
 
       this.showSubscribedOnly = Preferences.defaults.SOGoMailShowSubscribedFoldersOnly;
 
@@ -87,6 +90,10 @@
       });
     }
 
+    this.switchAdditionalParameters = function() {
+      this.showAdditionalParameters = !this.showAdditionalParameters;
+    };
+
     this.hideAdvancedSearch = function() {
       vm.service.$virtualPath = false;
       vm.service.$virtualMode = false;
@@ -113,15 +120,11 @@
       }
       // Contains
       if (this.searchForm.contains && this.searchForm.contains.length > 0) {
-        this.search.params.push(this.newSearchParam('subject', this.searchForm.contains));
-        this.search.params.push(this.newSearchParam('body', this.searchForm.contains));
-        this.search.match = 'OR';
+        this.search.params.push(this.newSearchParam('contains', this.searchForm.contains));
       }
       // Does not contains
       if (this.searchForm.doesnotcontains && this.searchForm.doesnotcontains.length > 0) {
-        this.search.params.push(this.newSearchParam('subject', '!' + this.searchForm.doesnotcontains));
-        this.search.params.push(this.newSearchParam('body', '!' + this.searchForm.doesnotcontains));
-        this.search.match = 'AND';
+        this.search.params.push(this.newSearchParam('not_contains', this.searchForm.doesnotcontains));
       }
       // Subject
       if (this.searchForm.subject && this.searchForm.subject.length > 0) {
@@ -134,6 +137,7 @@
       // Date
       if (this.searchForm.date && this.searchForm.date.length > 0) {
         var date = null;
+        var dateTo = null;
         var today = new Date();
         var tmp = new Date(today);
         switch (this.searchForm.date) {
@@ -164,10 +168,8 @@
             break;
           case 'between':
             date = this.formatDate(this.searchForm.dateStart);
-            this.search.params.push(this.newSearchParam('date', date, '>='));
-            date = this.formatDate(this.searchForm.dateEnd);
-            this.search.params.push(this.newSearchParam('date', date, '<'));
-            this.search.match = 'AND';
+            dateTo = this.formatDate(this.searchForm.dateEnd);
+            this.search.params.push(this.newSearchDateBetweenParam(date, dateTo));
             break;
         }
       }
@@ -175,9 +177,26 @@
       if (this.searchForm.size && this.searchForm.size.length > 0) {
         this.search.params.push(this.newSearchParam('size', this.searchForm.size, this.searchForm.sizeOperator));
       }
+      // Attachment
+      if (this.searchForm.attachements) {
+        this.search.params.push(this.newSearchParam('attachment', '1', '='));
+      }
+      // Favorite
+      if (this.searchForm.favorite) {
+        this.search.params.push(this.newSearchParam('favorite', '1', '='));
+      }
+      // Unseen
+      if (this.searchForm.unseen) {
+        this.search.params.push(this.newSearchParam('unseen', '1', '='));
+      }
 
       this.toggleAdvancedSearch();
     }
+
+    this.searchFieldChange = function (event) {
+      if (13 == event.keyCode)
+        this.addSearchParameters();
+    };
 
     this.toggleAdvancedSearch = function() {
       if (Mailbox.selectedFolder.$isLoading) {
@@ -262,21 +281,8 @@
       }
     };
 
-    this.searchForm = {
-      from: '',
-      to: '',
-      contains: '',
-      notContains: '',
-      subject: '',
-      body: '',
-      date: '',
-      dateStart: new Date(),
-      dateEnd: new Date(),
-      bcc: '',
-      size: '',
-      sizeOperator: '>',
-      sizeUnit: 'mb',
-      attachements: 1,
+    this.newSearchDateBetweenParam = function (dateFrom, dateTo) {
+      return { searchBy: 'date_between', searchInput: "*", dateFrom: dateFrom, dateTo: dateTo, negative: 0 };
     };
 
     this.toggleAccountState = function (account) {

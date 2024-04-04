@@ -13,119 +13,139 @@
 
          <md-input-container class="advanced-search-full">
             <label><var:string label:value="From"/></label>
-            <input type="text" var:value="app.searchForm.from" ng-model="app.searchForm.from" />
+            <input type="text" var:value="app.searchForm.from" ng-model="app.searchForm.from" ng-keyup="app.searchFieldChange($event)" />
           </md-input-container>
 
           <md-input-container class="advanced-search-full">
             <label><var:string label:value="To"/></label>
-            <input type="text" var:value="app.searchForm.to"  ng-model="app.searchForm.to"/>
+            <input type="text" var:value="app.searchForm.to"  ng-model="app.searchForm.to" ng-keyup="app.searchFieldChange($event)"/>
           </md-input-container>
 
           <md-input-container class="advanced-search-full">
             <label><var:string label:value="Contains"/></label>
-            <input type="text" var:value="app.searchForm.contains" ng-model="app.searchForm.contains"/>
+            <input type="text" var:value="app.searchForm.contains" ng-model="app.searchForm.contains" ng-keyup="app.searchFieldChange($event)" />
           </md-input-container>
 
-          <md-input-container class="advanced-search-full">
-            <label><var:string label:value="Does not contains"/></label>
-            <input type="text" var:value="app.searchForm.doesnotcontains" ng-model="app.searchForm.doesnotcontains"/>
-          </md-input-container>
+          <a href="#" ng-click="app.switchAdditionalParameters()" ng-show="!app.showAdditionalParameters">Show more</a>
+          <a href="#" ng-click="app.switchAdditionalParameters()" ng-show="app.showAdditionalParameters">Hide</a>
+          <div ng-show="app.showAdditionalParameters" class="md-toolbar-tools sg-toolbar-auto advanced-search">
 
-          <md-input-container class="advanced-search-full">
-            <label><var:string label:value="Subject"/></label>
-            <input type="text" var:value="app.searchForm.subject" ng-model="app.searchForm.subject"/>
-          </md-input-container>
-
-          <md-input-container class="advanced-search-full">
-            <label><var:string label:value="Body"/></label>
-            <input type="text" var:value="app.searchForm.body" ng-model="app.searchForm.body"/>
-          </md-input-container>
-
-          <div class="search-inline">
-            <md-select ng-model="app.searchForm.date"  class="search-right-space">
-                <md-option value="anytime">
-                  <var:string label:value="Anytime"/>
-                </md-option>
-                <md-option value="last7days">
-                  <var:string label:value="Last 7 days"/>
-                </md-option>
-                <md-option value="last30days">
-                  <var:string label:value="Last 30 days"/>
-                </md-option>
-                <md-option value="last6month">
-                  <var:string label:value="Last 6 month"/>
-                </md-option>
-                <md-option value="before">
-                  <var:string label:value="Before"/>
-                </md-option>
-                <md-option value="after">
-                  <var:string label:value="After"/>
-                </md-option>
-                <md-option value="between">
-                  <var:string label:value="Between"/>
-                </md-option>
-            </md-select>
-
-            <md-datepicker class="md-text search-right-space" 
-              ng-model="app.searchForm.dateStart"
-              md-hide-icons="calendar"
-              ng-change="app.changeDate()"
-              ng-show="['before', 'after', 'between'].indexOf(app.searchForm.date) != -1">
-            </md-datepicker>
-
-            <div class="search-right-space search-and" ng-show="['between'].indexOf(app.searchForm.date) != -1">
-              <var:string label:value="and"/>
-            </div>
-
-            <md-datepicker class="md-text search-right-space " 
-              ng-model="app.searchForm.dateEnd"
-              md-hide-icons="calendar"
-              ng-change="app.changeDate()"
-              ng-show="['between'].indexOf(app.searchForm.date) != -1">
-            </md-datepicker>
-          </div>
-
-          <md-input-container class="advanced-search-full">
-            <label><var:string label:value="Bcc"/></label>
-            <input type="text" var:value="app.searchForm.bcc" ng-model="app.searchForm.bcc"/>
-          </md-input-container>
-
-          <div class="search-inline">
-            <md-input-container class="md-text search-right-space">
-              <label><var:string label:value="Size"/></label>
-              <input type="text" var:value="app.searchForm.size" ng-model="app.searchForm.size"/>
+            <md-input-container class="advanced-search-full">
+              <label><var:string label:value="Does not contains"/></label>
+              <input type="text" var:value="app.searchForm.doesnotcontains" ng-model="app.searchForm.doesnotcontains" ng-keyup="app.searchFieldChange($event)"/>
             </md-input-container>
 
-            <md-select ng-model="app.searchForm.sizeOperator" class="search-right-space">
-                <md-option value="&gt;">
-                  &gt;
-                </md-option>
-                <md-option value="&lt;">
-                  &lt;
-                </md-option>
-            </md-select>
-            <md-select ng-model="app.searchForm.sizeUnit" class="search-right-space">
-                <md-option value="kb">
-                  <var:string label:value="Kb"/>
-                </md-option>
-                <md-option value="mb">
-                  <var:string label:value="Mb"/>
-                </md-option>
-                <md-option value="gb">
-                  <var:string label:value="Gb"/>
-                </md-option>
-            </md-select>
+            <md-input-container class="advanced-search-full">
+              <label><var:string label:value="Subject"/></label>
+              <input type="text" var:value="app.searchForm.subject" ng-model="app.searchForm.subject" ng-keyup="app.searchFieldChange($event)"/>
+            </md-input-container>
+
+            <md-input-container class="advanced-search-full">
+              <label><var:string label:value="Body"/></label>
+              <input type="text" var:value="app.searchForm.body" ng-model="app.searchForm.body" ng-keyup="app.searchFieldChange($event)"/>
+            </md-input-container>
+
+            <div class="search-inline">
+              <md-select ng-model="app.searchForm.date"  class="search-right-space">
+                  <md-option value="anytime">
+                    <var:string label:value="Anytime"/>
+                  </md-option>
+                  <md-option value="last7days">
+                    <var:string label:value="Last 7 days"/>
+                  </md-option>
+                  <md-option value="last30days">
+                    <var:string label:value="Last 30 days"/>
+                  </md-option>
+                  <md-option value="last6month">
+                    <var:string label:value="Last 6 month"/>
+                  </md-option>
+                  <md-option value="before">
+                    <var:string label:value="Before"/>
+                  </md-option>
+                  <md-option value="after">
+                    <var:string label:value="After"/>
+                  </md-option>
+                  <md-option value="between">
+                    <var:string label:value="Between"/>
+                  </md-option>
+              </md-select>
+
+              <md-datepicker class="md-text search-right-space" 
+                ng-model="app.searchForm.dateStart"
+                md-hide-icons="calendar"
+                ng-change="app.changeDate()"
+                ng-show="['before', 'after', 'between'].indexOf(app.searchForm.date) != -1">
+              </md-datepicker>
+
+              <div class="search-right-space search-and" ng-show="['between'].indexOf(app.searchForm.date) != -1">
+                <var:string label:value="and"/>
+              </div>
+
+              <md-datepicker class="md-text search-right-space " 
+                ng-model="app.searchForm.dateEnd"
+                md-hide-icons="calendar"
+                ng-change="app.changeDate()"
+                ng-show="['between'].indexOf(app.searchForm.date) != -1">
+              </md-datepicker>
+            </div>
+
+            <md-input-container class="advanced-search-full">
+              <label><var:string label:value="Bcc"/></label>
+              <input type="text" var:value="app.searchForm.bcc" ng-model="app.searchForm.bcc" ng-keyup="app.searchFieldChange($event)"/>
+            </md-input-container>
+
+            <div class="search-inline">
+              <md-input-container class="md-text search-right-space">
+                <label><var:string label:value="Size"/></label>
+                <input type="text" var:value="app.searchForm.size" ng-model="app.searchForm.size" ng-keyup="app.searchFieldChange($event)"/>
+              </md-input-container>
+
+              <md-select ng-model="app.searchForm.sizeOperator" class="search-right-space">
+                  <md-option value="&gt;">
+                    &gt;
+                  </md-option>
+                  <md-option value="&lt;">
+                    &lt;
+                  </md-option>
+              </md-select>
+              <md-select ng-model="app.searchForm.sizeUnit" class="search-right-space">
+                  <md-option value="kb">
+                    <var:string label:value="Kb"/>
+                  </md-option>
+                  <md-option value="mb">
+                    <var:string label:value="Mb"/>
+                  </md-option>
+                  <md-option value="gb">
+                    <var:string label:value="Gb"/>
+                  </md-option>
+              </md-select>
+            </div>
+
+
+            <md-checkbox
+                          ng-model="app.searchForm.attachements"
+                          ng-true-value="1"
+                          ng-false-value="0"
+                          label:aria-label="With attachments">
+              <var:string label:value="With attachments"/>
+            </md-checkbox>
+
+            <md-checkbox
+                          ng-model="app.searchForm.favorite"
+                          ng-true-value="1"
+                          ng-false-value="0"
+                          label:aria-label="In favorites">
+              <var:string label:value="In favorites"/>
+            </md-checkbox>
+
+            <md-checkbox
+                          ng-model="app.searchForm.unseen"
+                          ng-true-value="1"
+                          ng-false-value="0"
+                          label:aria-label="Unseen only">
+              <var:string label:value="Unseen only"/>
+            </md-checkbox>
           </div>
-
-
-          <md-checkbox
-                        ng-model="app.searchForm.attachements"
-                        ng-true-value="1"
-                        ng-false-value="0"
-                        label:aria-label="With attachments">
-            <var:string label:value="With attachments"/>
-          </md-checkbox>
-
 
 
 
