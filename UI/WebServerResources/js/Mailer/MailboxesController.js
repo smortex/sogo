@@ -6,8 +6,8 @@
   /**
    * @ngInject
    */
-  MailboxesController.$inject = ['$scope', '$state', '$transitions', '$timeout', '$window', '$mdUtil', '$mdMedia', '$mdSidenav', '$mdDialog', '$mdToast', 'sgConstant', 'sgFocus', 'encodeUriFilter', 'Dialog', 'sgSettings', 'sgHotkeys', 'Account', 'Mailbox', 'VirtualMailbox', 'User', 'Preferences', 'stateAccounts'];
-  function MailboxesController($scope, $state, $transitions, $timeout, $window, $mdUtil, $mdMedia, $mdSidenav, $mdDialog, $mdToast, sgConstant, focus, encodeUriFilter, Dialog, Settings, sgHotkeys, Account, Mailbox, VirtualMailbox, User, Preferences, stateAccounts) {
+  MailboxesController.$inject = ['$scope', '$state', '$transitions', '$timeout', '$window', '$mdUtil', '$mdMedia', '$mdSidenav', '$mdDialog', '$mdToast', 'sgConstant', 'sgFocus', 'encodeUriFilter', 'Dialog', 'sgSettings', 'sgHotkeys', 'Account', 'Mailbox', 'VirtualMailbox', 'User', 'Preferences', 'stateAccounts', 'Message'];
+  function MailboxesController($scope, $state, $transitions, $timeout, $window, $mdUtil, $mdMedia, $mdSidenav, $mdDialog, $mdToast, sgConstant, focus, encodeUriFilter, Dialog, Settings, sgHotkeys, Account, Mailbox, VirtualMailbox, User, Preferences, stateAccounts, Message) {
     var vm = this,
         account,
         mailbox,
@@ -16,6 +16,7 @@
     this.$onInit = function () {
       this.service = Mailbox;
       this.accounts = stateAccounts;
+      this.service = Message;
 
       // Advanced search options
       this.searchForm = {
@@ -35,6 +36,8 @@
         attachements: 0,
         favorite: 0,
         unseen: 0,
+        tags: { searchText: '', selected: '' },
+        flags: [],
       };
       this.search = {
         options: {'': '',  // no placeholder when no criteria is active
@@ -189,6 +192,10 @@
       if (this.searchForm.unseen) {
         this.search.params.push(this.newSearchParam('unseen', '1', '='));
       }
+      // Flags
+      if (this.searchForm.flags && this.searchForm.flags.length > 0) {
+        this.search.params.push(this.newSearchFlagsParam());
+      }
 
       this.toggleAdvancedSearch();
     }
@@ -283,6 +290,10 @@
 
     this.newSearchDateBetweenParam = function (dateFrom, dateTo) {
       return { searchBy: 'date_between', searchInput: "*", dateFrom: dateFrom, dateTo: dateTo, negative: 0 };
+    };
+
+    this.newSearchFlagsParam = function () {
+      return { searchBy: 'flags', searchInput: "*", flags: vm.searchForm.flags, negative: 0 };
     };
 
     this.toggleAccountState = function (account) {
