@@ -211,6 +211,9 @@
     var editor;
     var editorChanged = false;
     var modelChanged = false;
+    var editorChangedTimerValue = 2000;
+    var editorChangedTimer = null;
+
 
     this.$onInit = function () {
       vm.ngModelCtrl.$render = function () {
@@ -285,9 +288,10 @@
           //   vm.editor.editing.view.domRoots.get("main").style.marginRight = vm.ckMargin;
           // }
           
-          vm.editor.model.document.on('pasteState', onEditorChange);
-          vm.editor.model.document.on('change:data', onEditorChange);
-          vm.editor.model.document.on('paste', onEditorPaste);
+          vm.editor.model.document.on('pasteState', function () { onEditorChange(false); });
+          vm.editor.model.document.on('change:data', function () { onEditorChange(false); });
+          vm.editor.model.document.on('paste', function () { onEditorChange(false); });
+          editor.editing.view.document.on('blur', function () { onEditorChange(true); });
 
           onInstanceReady();
 
@@ -337,30 +341,42 @@
         vm.editor.destroy(noUpdate);
     }
 
-    function onEditorChange () {
-      var html = vm.editor.getData();
+    function onEditorChange(force) {
+      if (editorChangedTimer)
+        clearTimeout(editorChangedTimer);
 
-      var dom = document.createElement("DIV");
-      dom.innerHTML = html;
-      var text = (dom.textContent || dom.innerText);
+      var refresh = function() {
+        var html = vm.editor.getData();
 
-      if (text === '\n') {
-        text = '';
-      }
+        var dom = document.createElement("DIV");
+        dom.innerHTML = html;
+        var text = (dom.textContent || dom.innerText);
 
-      if (!modelChanged && html !== vm.ngModelCtrl.$viewValue) {
-        editorChanged = true;
-        vm.ngModelCtrl.$setViewValue(html);
-        validate(vm.checkTextLength ? text : html);
-        if (vm.onContentChanged) {
-          vm.onContentChanged({
-            'editor': vm.editor,
-            'html': html,
-            'text': text
-          });
+        if (text === '\n') {
+          text = '';
         }
+
+        if (!modelChanged && html !== vm.ngModelCtrl.$viewValue) {
+          editorChanged = true;
+          vm.ngModelCtrl.$setViewValue(html);
+          validate(vm.checkTextLength ? text : html);
+          if (vm.onContentChanged) {
+            vm.onContentChanged({
+              'editor': vm.editor,
+              'html': html,
+              'text': text
+            });
+          }
+        }
+        modelChanged = false;
+        editorChangedTimer = null;
+      };
+
+      if (force) {
+        refresh();
+      } else {
+        editorChangedTimer = setTimeout(refresh, editorChangedTimerValue);
       }
-      modelChanged = false;
     }
 
     function onEditorPaste (event) {

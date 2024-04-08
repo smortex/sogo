@@ -1399,6 +1399,10 @@
 	}
       else if ([nodeName isEqualToString: @"set-roles"])
 	{
+    // Disable Acl modifications if this is not the owner
+    if (![self ignoreRights])
+      return nil;
+
 	  // We support two ways of setting roles. The first one is, for example:
 	  //
 	  // <?xml version="1.0" encoding="UTF-8"?>
@@ -1425,7 +1429,7 @@
 	  
 	  allRoles = [self _davGetRolesFromRequest: node];
 	  for (i = 0; i < [allUsers count]; i++)
-	    {
+	    { 
 	      [self setRoles: allRoles
                      forUser: [allUsers objectAtIndex: i]];
 	    }
@@ -1446,6 +1450,9 @@
       //
       else if ([nodeName isEqualToString: @"add-user"])
 	{
+    // Disable Acl modifications if this is not the owner
+    if (![self ignoreRights])
+      return nil;
 	  attrs = [node attributes];
 	  userAttr = [attrs namedItem: @"user"];
 	  user = [userAttr nodeValue];
@@ -1454,6 +1461,9 @@
 	}
       else if ([nodeName isEqualToString: @"add-users"])
 	{
+    // Disable Acl modifications if this is not the owner
+    if (![self ignoreRights])
+      return nil;
 	  attrs = [node attributes];
 	  userAttr = [attrs namedItem: @"users"];
 	  allUsers = [[userAttr nodeValue] componentsSeparatedByString: @","];
@@ -1474,6 +1484,9 @@
       //
       else if ([nodeName isEqualToString: @"remove-user"])
 	{
+    // Disable Acl modifications if this is not the owner
+    if (![self ignoreRights])
+      return nil;
 	  attrs = [node attributes];
 	  userAttr = [attrs namedItem: @"user"];
 	  user = [userAttr nodeValue];
