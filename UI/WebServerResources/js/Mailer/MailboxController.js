@@ -380,6 +380,7 @@
     }
 
     this.selectMessage = function(message) {
+      alert('ok');
       if (Mailbox.$virtualMode) {
         vm.isLoadingMessage = true;
         $state.go('mail.account.virtualMailbox.message', { mailboxId: encodeUriFilter(encodeUriFilter(message.$mailbox.path)), messageId: message.uid }).then(function () {

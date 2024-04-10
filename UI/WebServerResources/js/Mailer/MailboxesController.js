@@ -2,7 +2,7 @@
 
 (function() {
   'use strict';
-
+  
   /**
    * @ngInject
    */
@@ -13,10 +13,14 @@
         mailbox,
         hotkeys = [];
 
+    $scope.closeDialog = function () {
+      $mdDialog.hide();
+    };
+
     this.$onInit = function () {
       this.service = Mailbox;
       this.accounts = stateAccounts;
-      this.service = Message;
+      this.message = Message;
 
       // Advanced search options
       this.searchForm = {
@@ -39,6 +43,7 @@
         tags: { searchText: '', selected: '' },
         flags: [],
       };
+
       this.search = {
         options: {'': '',  // no placeholder when no criteria is active
                   subject: l('Enter Subject'),
@@ -54,7 +59,6 @@
         match: 'AND',
         params: []
       };
-      this.showAdditionalParameters = false;
 
       this.showSubscribedOnly = Preferences.defaults.SOGoMailShowSubscribedFoldersOnly;
 
@@ -93,8 +97,33 @@
       });
     }
 
-    this.switchAdditionalParameters = function() {
-      this.showAdditionalParameters = !this.showAdditionalParameters;
+    this.showAdditionalParameters = function() {
+      $mdDialog.show({
+        template: document.getElementById('advancedSearch').innerHTML,
+        parent: angular.element(document.body),
+        controller: function () {
+          var dialogCtrl = this;
+
+          this.$onInit = function () {
+            // Pass main controller
+            this.mainController = vm;
+            this.mailbox = Mailbox;
+            this.message = Message;
+          };
+
+          dialogCtrl.closeDialog = function () {
+            $mdDialog.hide();
+          };
+
+          dialogCtrl.search = function () {
+            this.mainController.addSearchParameters();
+            $mdDialog.hide();
+          };
+        },
+        controllerAs: 'dialogCtrl',
+        clickOutsideToClose: true,
+        escapeToClose: true,
+      });
     };
 
     this.hideAdvancedSearch = function() {
@@ -103,7 +132,7 @@
 
       account = vm.accounts[0];
       mailbox = vm.searchPreviousMailbox;
-      if (mailbox)
+      if (mailbox && mailbox.path)
         $state.go('mail.account.mailbox', { accountId: account.id, mailboxId: encodeUriFilter(mailbox.path) });
     };
 
@@ -177,8 +206,8 @@
         }
       }
       // Size
-      if (this.searchForm.size && this.searchForm.size.length > 0) {
-        this.search.params.push(this.newSearchParam('size', this.searchForm.size, this.searchForm.sizeOperator));
+      if (this.searchForm.size && this.searchForm.size > 0) {
+        this.search.params.push(this.newSearchParam('size', this.searchForm.size.toString(), this.searchForm.sizeOperator));
       }
       // Attachment
       if (this.searchForm.attachements) {
@@ -201,8 +230,10 @@
     }
 
     this.searchFieldChange = function (event) {
-      if (13 == event.keyCode)
+      if (13 == event.keyCode) {
         this.addSearchParameters();
+        $mdDialog.hide();
+      } 
     };
 
     this.toggleAdvancedSearch = function() {
@@ -461,5 +492,7 @@
   angular
     .module('SOGo.MailerUI')
     .controller('MailboxesController', MailboxesController);
+
+  
 })();
 

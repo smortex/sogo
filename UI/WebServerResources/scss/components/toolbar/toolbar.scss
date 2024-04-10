@@ -18,7 +18,7 @@ md-toolbar {
   transition-duration: 0s;
 }
 
-.md-toolbar-tools, .md-toolbar-tools .md-datepicker-input {
+.md-toolbar-tools, .md-toolbar-tools .md-datepicker-input, .md-chips {
   font-size: $subhead-font-size-base;
 }
 
@@ -46,7 +46,6 @@ md-toolbar {
 }
 
 .md-toolbar-tools .md-datepicker-input {
-  color: rgba(255, 255, 255, 0.87); // {{primary-contrast}}
   margin-top: 5px;
 }
 
@@ -187,13 +186,13 @@ hgroup {
   width: 100%;
 }
 
-.advanced-search md-input-container, .advanced-search md-select, .advanced-search md-datepicker, .advanced-search .search-and  {
+.advanced-search md-input-container, .advanced-search md-select, .advanced-search md-datepicker, .advanced-search .search-and, .advanced-search a  {
   margin: 10px 0;
   padding: 2px;
 }
 
-.advanced-search md-checkbox.md-checked .md-icon {
-  background-color: rgba(255, 255, 255, 0.37);
+.advanced-search-in {
+  margin-top: 10px;
 }
 
 .search-inline md-menu, .search-inline button {

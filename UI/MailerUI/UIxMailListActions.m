@@ -606,6 +606,8 @@
                                         [[flags objectAtIndex: j] stringByReplacingOccurrencesOfString: @"_$" withString:@"$"]];
                     }
                     searchString = [NSString stringWithFormat: @"%@)", searchString];
+                  } else {
+                    searchString = [NSString stringWithFormat: @"(size > 0)"];
                   }
                 } else {
                   // Others

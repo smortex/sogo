@@ -122,10 +122,25 @@
   </script>
 
   <script type="text/ng-template" id="UIxMailFolderTemplate">
+  
     <md-toolbar layout="row" layout-align="space-between center" class="toolbar-main"
-                ng-hide="mailbox.service.$virtualPath !== false">
+                ng-hide="app.service.$virtualPath !== false">
       <var:component className="UIxTopnavToolbar"/>
     </md-toolbar>
+
+    <!-- Advanced search toolbar -->
+    <md-toolbar layout="column" class="toolbar-main md-hue-3"
+                ng-show="mailbox.service.$virtualPath !== false">
+      <div class="md-toolbar-tools">
+        <div class="pseudo-input-container md-flex">
+            <var:string label:value="Advanced search"/>
+        </div>
+        <md-button type="button" class="sg-icon-button" ng-click="app.hideAdvancedSearch()">
+          <md-icon>close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
 
     <div layout="row" class="md-flex sg-block-print">
       <var:component className="UIxMailFolderTemplate" />
