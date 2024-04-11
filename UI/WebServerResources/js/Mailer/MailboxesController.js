@@ -59,6 +59,7 @@
         match: 'AND',
         params: []
       };
+      this.highlightWords = [];
 
       this.showSubscribedOnly = Preferences.defaults.SOGoMailShowSubscribedFoldersOnly;
 
@@ -136,8 +137,20 @@
         $state.go('mail.account.mailbox', { accountId: account.id, mailboxId: encodeUriFilter(mailbox.path) });
     };
 
+    this.addHighlightWords = function(sentence) {
+      var words = sentence.split(" ");
+
+      words.forEach(word => {
+        var cleanedWord = word.trim().toLowerCase();
+        if (!this.highlightWords.includes(cleanedWord)) {
+          this.highlightWords.push(cleanedWord);
+        }
+      });
+    };
+
     this.addSearchParameters = function() {
       this.search.params = [];
+      this.highlightWords = [];
       // From
       if (this.searchForm.from && this.searchForm.from.length > 0) {
         this.search.params.push(this.newSearchParam('from', this.searchForm.from));
@@ -153,6 +166,7 @@
       // Contains
       if (this.searchForm.contains && this.searchForm.contains.length > 0) {
         this.search.params.push(this.newSearchParam('contains', this.searchForm.contains));
+        this.addHighlightWords(this.searchForm.contains);
       }
       // Does not contains
       if (this.searchForm.doesnotcontains && this.searchForm.doesnotcontains.length > 0) {
@@ -267,6 +281,7 @@
 
         if (Mailbox.$virtualPath.length) {
           root = vm.accounts[0].$getMailboxByPath(Mailbox.$virtualPath);
+          root.setHighlightWords(vm.highlightWords);
           mailboxes.push(root);
           if (vm.search.subfolders && root.children.length)
             _visit(root.children);

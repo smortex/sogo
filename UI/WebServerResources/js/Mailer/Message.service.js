@@ -473,12 +473,34 @@
         }
       };
 
+    
+
     if (this.$parts)
       // Use the cache
       return this.$parts;
 
     else if (this.parts)
       _visit(this.parts);
+
+
+    // Highlight words
+    if (parts && this.$mailbox && this.$mailbox.getHighlightWords().length > 0) {
+      var i = 0, j = 0;
+      for (i = 0; i < parts.length; i++) {
+        if (parts[i]
+          && parts[i].type
+          && "UIxMailPartHTMLViewer" == parts[i].type) {
+          for (j = 0; j < this.$mailbox.getHighlightWords().length; j++) {
+            var word = this.$mailbox.getHighlightWords()[j];
+            var regExp = new RegExp('([ \n.\r])*' + word + '([ \n.\r])+', 'gi');
+            parts[i].content = parts[i].content.replace(regExp, '<span class="sogo-highlight" style="background-color: yellow;">$&</span>');
+            regExp = new RegExp(word, 'gi');
+            if (-1 === this.subject.indexOf("sogo-highlight"))
+              this.subject = this.subject.replace(regExp, '<span class="sogo-highlight" style="background-color: yellow;">$&</span>');
+          }
+        }
+      }
+    }
 
     // Cache result
     this.$parts = parts;
