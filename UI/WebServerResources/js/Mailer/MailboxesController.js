@@ -133,8 +133,12 @@
 
       account = vm.accounts[0];
       mailbox = vm.searchPreviousMailbox;
-      if (mailbox && mailbox.path)
+      vm.search.params = [];
+      vm.highlightWords = [];
+      if (mailbox && mailbox.path) {
+        mailbox.setHighlightWords([]);
         $state.go('mail.account.mailbox', { accountId: account.id, mailboxId: encodeUriFilter(mailbox.path) });
+      }
     };
 
     this.addHighlightWords = function(sentence) {
@@ -390,9 +394,12 @@
         }
       }
     };
-
+    
     this.showAdvancedSearch = function() {
-      Mailbox.$virtualPath = '';
+      if (Mailbox.selectedFolder.path)
+        Mailbox.$virtualPath = Mailbox.selectedFolder.path;
+      else
+        Mailbox.$virtualPath = '';
       // Close sidenav on small devices
       if (!$mdMedia(sgConstant['gt-md']))
         $mdSidenav('left').close();

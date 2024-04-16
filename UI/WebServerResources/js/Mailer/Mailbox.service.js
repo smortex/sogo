@@ -169,6 +169,9 @@
       this.$visibleMessages = this.$messages;
       this.$selectedMessages = [];
     }
+    if (angular.isUndefined(this.$highlightWords)) {
+      this.$highlightWords = [];
+    }
     angular.extend(this, data);
     if (this.path) {
       this.id = this.$id();
@@ -384,6 +387,21 @@
     if (sortingAttributes)
       // Sorting preferences are common to all mailboxes
       angular.extend(Mailbox.$query, sortingAttributes);
+
+    if (filters && filters.length > 0) {
+      // Remove highlight words
+      this.$highlightWords = [];
+      filters.forEach(filter => {
+        var words = filter.searchInput.split(" ");
+
+        words.forEach(word => {
+          var cleanedWord = word.trim().toLowerCase();
+          if (!this.$highlightWords.includes(cleanedWord)) {
+            this.$highlightWords.push(cleanedWord);
+          }
+        });
+      });
+    }
 
     angular.extend(options, { sortingAttributes: Mailbox.$query });
     if (angular.isDefined(filters)) {
@@ -1249,4 +1267,23 @@
     Mailbox.$$resource.post(this.id, action);
   };
 
+  /**
+   * @function setHighlightWords
+   * @memberof Mailbox.prototype
+   * @desc Set highlight words when searching
+   * @param {array} highlightWords - a list of words
+   */
+  Mailbox.prototype.setHighlightWords = function (highlightWords) {
+    this.$highlightWords = highlightWords;
+  };
+
+  /**
+   * @function getHighlightWords
+   * @memberof Mailbox.prototype
+   * @desc Get highlight words when searching
+   * @returns a list of words
+   */
+  Mailbox.prototype.getHighlightWords = function () {
+    return this.$highlightWords;
+  };
 })();

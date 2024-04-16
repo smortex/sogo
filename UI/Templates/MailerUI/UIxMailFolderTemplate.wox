@@ -10,9 +10,16 @@
                 ng-hide="app.service.$virtualPath === false || mailbox.mode.multiple">
        <div class="md-toolbar-tools sg-toolbar-auto advanced-search">
 
-         <md-input-container class="advanced-search-full">
-            <label><var:string label:value="From"/></label>
-            <input type="text" var:value="app.searchForm.from" ng-model="app.searchForm.from" ng-keyup="app.searchFieldChange($event)" />
+         <md-input-container class="advanced-search-full  advanced-search-more">
+            <div>
+              <label><var:string label:value="From"/></label>
+              <input type="text" var:value="app.searchForm.from" ng-model="app.searchForm.from" ng-keyup="app.searchFieldChange($event)" />
+            </div>
+            <div>
+              <md-button type="button" class="sg-icon-button" ng-click="app.hideAdvancedSearch()">
+                <md-icon>close</md-icon>
+              </md-button>
+            </div>
           </md-input-container>
 
           <md-input-container class="advanced-search-full">
@@ -20,12 +27,18 @@
             <input type="text" var:value="app.searchForm.to"  ng-model="app.searchForm.to" ng-keyup="app.searchFieldChange($event)"/>
           </md-input-container>
 
-          <md-input-container class="advanced-search-full">
-            <label><var:string label:value="Contains"/></label>
-            <input type="text" var:value="app.searchForm.contains" ng-model="app.searchForm.contains" ng-keyup="app.searchFieldChange($event)" />
+          <md-input-container class="advanced-search-full advanced-search-more">
+            <div>
+              <label><var:string label:value="Contains"/></label>
+              <input type="text" var:value="app.searchForm.contains" ng-model="app.searchForm.contains" ng-keyup="app.searchFieldChange($event)" />
+            </div>
+            <div>
+              <md-button class="sg-icon-button" label:aria-label="Show more"
+                   ng-click="app.showAdditionalParameters()">
+                <md-icon>add_circle</md-icon>
+              </md-button>
+            </div>
           </md-input-container>
-
-          <a href="#" ng-click="app.showAdditionalParameters()" ng-hide="mailbox.service.$virtualPath === false || mailbox.mode.multiple"><var:string label:value="Show more"/></a>
         
           <div class="search-inline advanced-search-full"
                 ng-hide="mailbox.service.$virtualPath === false || mailbox.mode.multiple">
@@ -204,6 +217,9 @@
             <md-option value="body"><var:string label:value="Entire Message"/></md-option>
           </md-select>
         </md-input-container>
+        <a class="sg-icon-button show-advanced-search" ng-click="app.showAdvancedSearch()">
+          <md-icon>more</md-icon>
+        </a>
       </form>
     </md-toolbar>
 

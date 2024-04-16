@@ -489,15 +489,23 @@
       for (i = 0; i < parts.length; i++) {
         if (parts[i]
           && parts[i].type
-          && "UIxMailPartHTMLViewer" == parts[i].type) {
-          for (j = 0; j < this.$mailbox.getHighlightWords().length; j++) {
-            var word = this.$mailbox.getHighlightWords()[j];
-            var regExp = new RegExp('([ \n.\r])*' + word + '([ \n.\r])+', 'gi');
-            parts[i].content = parts[i].content.replace(regExp, '<span class="sogo-highlight" style="background-color: yellow;">$&</span>');
-            regExp = new RegExp(word, 'gi');
-            if (-1 === this.subject.indexOf("sogo-highlight"))
-              this.subject = this.subject.replace(regExp, '<span class="sogo-highlight" style="background-color: yellow;">$&</span>');
-          }
+          && ("UIxMailPartHTMLViewer" == parts[i].type
+          || "UIxMailPartTextViewer" == parts[i].type)) {
+          
+          // Content
+          var dom = document.createElement("DIV");
+          dom.innerHTML = parts[i].content;
+          var markInstance = new Mark(dom);
+          markInstance.mark(this.$mailbox.getHighlightWords());
+          parts[i].content = dom.innerHTML;
+          dom.remove();
+          // Title
+          dom = document.createElement("DIV");
+          dom.innerHTML = this.subject;
+          markInstance = new Mark(dom);
+          markInstance.mark(this.$mailbox.getHighlightWords());
+          this.subject = dom.innerHTML;
+          dom.remove();
         }
       }
     }

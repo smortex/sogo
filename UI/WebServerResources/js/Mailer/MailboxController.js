@@ -175,6 +175,12 @@
     };
 
     this.cancelSearch = function() {
+      // Clean highlights
+      if (vm.account) {
+        vm.account.$getMailboxes().$$state.value.forEach((mailbox) => {
+          mailbox.setHighlightWords([]);
+        });
+      }
       vm.mode.search = false;
       vm.selectedFolder.$filter(vm.service.$query).then(function() {
         if (vm.selectedFolder.$selectedMessage) {

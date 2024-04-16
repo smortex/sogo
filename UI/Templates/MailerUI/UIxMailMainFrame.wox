@@ -8,7 +8,7 @@
     xmlns:label="OGo:label"
     className="UIxPageFrame"
     title="moduleName"
-    const:jsFiles="vendor/ckeditor/build/ckeditor.js, Common/sgCkeditor.component.js, Common.js, Preferences.services.js, Contacts.services.js, Scheduler.services.js, Mailer.js, Mailer.services.js, vendor/angular-file-upload.min.js, vendor/FileSaver.min.js, vendor/punycode.js">
+    const:jsFiles="vendor/ckeditor/build/ckeditor.js, Common/sgCkeditor.component.js, Common.js, Preferences.services.js, Contacts.services.js, Scheduler.services.js, Mailer.js, Mailer.services.js, vendor/angular-file-upload.min.js, vendor/FileSaver.min.js, vendor/punycode.js, vendor/mark.min.js">
   <script type="text/javascript">
     var mailAccounts = <var:string value="mailAccounts" const:escapeHTML="NO" />;
     var userNames = <var:string value="userNames" const:escapeHTML="NO" />;
@@ -127,20 +127,6 @@
                 ng-hide="app.service.$virtualPath !== false">
       <var:component className="UIxTopnavToolbar"/>
     </md-toolbar>
-
-    <!-- Advanced search toolbar -->
-    <md-toolbar layout="column" class="toolbar-main md-hue-3"
-                ng-show="mailbox.service.$virtualPath !== false">
-      <div class="md-toolbar-tools">
-        <div class="pseudo-input-container md-flex">
-            <var:string label:value="Advanced search"/>
-        </div>
-        <md-button type="button" class="sg-icon-button" ng-click="app.hideAdvancedSearch()">
-          <md-icon>close</md-icon>
-        </md-button>
-      </div>
-    </md-toolbar>
-
 
     <div layout="row" class="md-flex sg-block-print">
       <var:component className="UIxMailFolderTemplate" />
