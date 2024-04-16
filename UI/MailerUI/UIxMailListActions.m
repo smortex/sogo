@@ -885,7 +885,7 @@
 
       a = [uids flattenedArray];
       count = [a count];
-      if (count > headersPrefetchMaxSize)
+      if (count > headersPrefetchMaxSize && !onlyAttachments) // Only attachment to get all messages
         count = headersPrefetchMaxSize;
       r = NSMakeRange(0, count);
       headers = [self getHeadersForUIDs: [a subarrayWithRange: r]
