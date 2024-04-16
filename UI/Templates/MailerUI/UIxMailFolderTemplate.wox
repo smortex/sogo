@@ -217,8 +217,9 @@
             <md-option value="body"><var:string label:value="Entire Message"/></md-option>
           </md-select>
         </md-input-container>
-        <a class="sg-icon-button show-advanced-search" ng-click="app.showAdvancedSearch()">
+        <a class="sg-icon-button show-advanced-search" ng-click="app.showAdvancedSearch()" aria-label="Advanced search">
           <md-icon>more</md-icon>
+          <md-tooltip><var:string label:value="Advanced search"/></md-tooltip>
         </a>
       </form>
     </md-toolbar>
