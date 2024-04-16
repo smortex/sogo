@@ -499,6 +499,11 @@ mark {
   display: flex;
 }
 
+.advanced-search-more-no-bottom {
+  margin-bottom: 0!important;
+  margin-top: 20px !important;
+}
+
 .advanced-search-more > :first-child {
   width: 100%;
 }

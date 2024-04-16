@@ -45,16 +45,6 @@
       };
 
       this.search = {
-        options: {'': '',  // no placeholder when no criteria is active
-                  subject: l('Enter Subject'),
-                  from:    l('Enter From'),
-                  to:      l('Enter To'),
-                  cc:      l('Enter Cc'),
-                  bcc:     l('Enter Bcc'),
-                  body:    l('Enter Body'),
-                  size:    l('Enter Size'),
-                  date:    l('Enter Date'),
-                 },
         subfolders: 1,
         match: 'AND',
         params: []
@@ -136,8 +126,16 @@
       vm.search.params = [];
       vm.highlightWords = [];
       if (mailbox && mailbox.path) {
+        // Reset
         mailbox.setHighlightWords([]);
-        $state.go('mail.account.mailbox', { accountId: account.id, mailboxId: encodeUriFilter(mailbox.path) });
+        mailbox.$filter({
+          "sort": "date",
+          "asc": false,
+          "match": "OR"
+        }).then(function () {
+          $state.go('mail.account.mailbox', { accountId: account.id, mailboxId: encodeUriFilter(mailbox.path) });
+          vm.$onInit(); // Reinit search fields
+        });
       }
     };
 
@@ -179,10 +177,12 @@
       // Subject
       if (this.searchForm.subject && this.searchForm.subject.length > 0) {
         this.search.params.push(this.newSearchParam('subject', this.searchForm.subject));
+        this.addHighlightWords(this.searchForm.subject);
       }
       // Body
       if (this.searchForm.body && this.searchForm.body.length > 0) {
         this.search.params.push(this.newSearchParam('body', this.searchForm.body));
+        this.addHighlightWords(this.searchForm.body);
       }
       // Date
       if (this.searchForm.date && this.searchForm.date.length > 0) {

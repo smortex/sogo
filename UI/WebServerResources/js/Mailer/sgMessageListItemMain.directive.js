@@ -170,7 +170,7 @@
           }
 
           // Subject
-          $ctrl.subjectElement.innerHTML = $ctrl.message.subject.encodeEntities();
+          $ctrl.subjectElement.innerHTML = $ctrl.message.getHighlightSubject();
 
           // Message size
           $ctrl.sizeElement.innerHTML = $ctrl.message.size;
@@ -194,6 +194,11 @@
 
       this.service = Message;
       this.MailboxService = Mailbox;
+    };
+
+    this.$doCheck = function () {
+      if ($ctrl && $ctrl.message)
+        $ctrl.subjectElement.innerHTML = $ctrl.message.getHighlightSubject();
     };
 
     this.toggleThread = function() {

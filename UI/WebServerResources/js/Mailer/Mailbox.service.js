@@ -392,14 +392,18 @@
       // Remove highlight words
       this.$highlightWords = [];
       filters.forEach(filter => {
-        var words = filter.searchInput.split(" ");
-
-        words.forEach(word => {
-          var cleanedWord = word.trim().toLowerCase();
-          if (!this.$highlightWords.includes(cleanedWord)) {
-            this.$highlightWords.push(cleanedWord);
-          }
-        });
+        if ("subject_or_from" == filter.searchBy
+          || "contains" == filter.searchBy
+          || "body" == filter.searchBy
+          || "subject" == filter.searchBy) {
+          var words = filter.searchInput.split(" ");
+          words.forEach(word => {
+            var cleanedWord = word.trim().toLowerCase();
+            if (!this.$highlightWords.includes(cleanedWord)) {
+              this.$highlightWords.push(cleanedWord);
+            }
+          });
+        }
       });
     }
 

@@ -483,7 +483,7 @@
   content = [[request contentAsString] objectFromJSONString];
   notDeleted = [EOQualifier qualifierWithQualifierFormat: @"(not (flags = %@))", @"deleted"];
   qualifiers = [NSMutableArray arrayWithObject: notDeleted];
-  searchString = nil;
+  searchString = @"";
   match = nil;
   filters = [content objectForKey: @"filters"];
   labels = [content objectForKey: @"labels"];
@@ -496,146 +496,145 @@
       if (max > 0) {
         searchArray = [NSMutableArray arrayWithCapacity: max];
         for (i = 0; i < max; i++)
-          {
-            filter = [filters objectAtIndex:i];
-            searchBy = [filter objectForKey: @"searchBy"];
-            searchInput = [filter objectForKey: @"searchInput"];
-            
-            if (searchBy && searchInput)
-              {
-                // Size
-                if ([searchBy isEqualToString: @"size"]) {
-                  operator = [filter objectForKey: @"operator"];
-                  sizeUnit = [filter objectForKey: @"sizeUnit"];
-                  formatter = [[NSNumberFormatter alloc] init];
-                  formatter.numberStyle = NSNumberFormatterDecimalStyle;
-                  size = [formatter numberFromString: searchInput];
-                  [formatter release];
-                  if ([[sizeUnit lowercaseString] isEqualToString: @"kb"]) {
-                    size = [NSNumber numberWithLongLong: [size longLongValue] * 1024];
-                  } else if ([[sizeUnit lowercaseString] isEqualToString: @"mb"]) {
-                    size = [NSNumber numberWithLongLong: [size longLongValue]  * 1024 * 1024];
-                  } else if ([[sizeUnit lowercaseString] isEqualToString: @"gb"]) {
-                    size = [NSNumber numberWithLongLong: [size longLongValue] * 1024 * 1024 * 1024];
-                  }
-                  
-                  searchString = [NSString stringWithFormat: @"(%@ %@ %@)", searchBy, operator, [size stringValue]];
-                } else if ([searchBy isEqualToString: @"date"]) {
-                  // Date
-                  operator = [filter objectForKey: @"operator"];
-                  searchString = [NSString stringWithFormat: @"(%@ %@ (NSCalendarDate)\"%@\")", searchBy, operator, searchInput];
-                } else if ([searchBy isEqualToString: @"date_between"]) {
-                  // Date between
-                  dateFrom = [filter objectForKey: @"dateFrom"];
-                  dateTo = [filter objectForKey: @"dateTo"];
-                  searchString = [NSString stringWithFormat: @"(date >= (NSCalendarDate)\"%@\" AND date <= (NSCalendarDate)\"%@\")", dateFrom, dateTo];
-                  
-                } else if ([searchBy isEqualToString: @"attachment"]) {
-                  // Attachment
-                  // Not possible with imap search, check in getUIDsInFolder method
-                  // The attachments must be checked in headers
-                  searchString = [NSString stringWithFormat: @"(size > 0)"];
-                } else if ([searchBy isEqualToString: @"favorite"]) {
-                  // Favorite
-                  flaggedOnly = YES;
-                  searchString = [NSString stringWithFormat: @"(size > 0)"];
-                } else if ([searchBy isEqualToString: @"unseen"]) {
-                  // Unseen
-                  unseenOnly = YES;
-                  searchString = [NSString stringWithFormat: @"(size > 0)"];
-                } else if ([searchBy isEqualToString: @"contains"]) {
-                  // Contains
-                  // Split on space to check each word
-                  searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
-                  searchInputSplit = [searchInput componentsSeparatedByString:@" "];
-                  if ([searchInputSplit count] > 1) {
-                    searchString = @"(";
-                    j = 0;
-                    for (searchInput in searchInputSplit) {
-                      if (j > 0) {
-                        searchString = [NSString stringWithFormat: @"%@ OR", searchString];
-                      }
-                      
-                      searchString = [NSString stringWithFormat: @"%@ (subject doesContain: '%@' OR body doesContain: '%@')", 
-                      searchString, searchInput, searchInput];
-                      j++;
-                    }
-                    searchString = [NSString stringWithFormat: @"%@)", searchString];
-                  } else {
-                    searchString = [NSString stringWithFormat: @"(subject doesContain: '%@' OR body doesContain: '%@')", 
-                      searchInput, searchInput];
-                  }
-                  
-                } else if ([searchBy isEqualToString: @"not_contains"]) {
-                  // Not contains
-                  searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
-                  searchString = [NSString stringWithFormat: @"(NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
-                  searchInput, searchInput];
-
-                  // Split on space to check each word
-                  searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
-                  searchInputSplit = [searchInput componentsSeparatedByString:@" "];
-                  if ([searchInputSplit count] > 1) {
-                    searchString = @"(";
-                    j = 0;
-                    for (searchInput in searchInputSplit) {
-                      if (j > 0) {
-                        searchString = [NSString stringWithFormat: @"%@ AND", searchString];
-                      }
-                      
-                      searchString = [NSString stringWithFormat: @"%@ (NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
-                      searchString, searchInput, searchInput];
-                      j++;
-                    }
-                    searchString = [NSString stringWithFormat: @"%@)", searchString];
-                  } else {
-                    searchString = [NSString stringWithFormat: @"(NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
-                      searchInput, searchInput];
-                  }
-                 } else if ([searchBy isEqualToString: @"flags"]) {
-                  // Flags
-                  flags = [filter objectForKey: @"flags"];
-                  if (flags && [flags count] > 0) {
-                    searchString = @"(";
-                    
-                    for (j = 0 ; j < [flags count] ; j++) {
-                      if (j > 0)
-                        searchString = [NSString stringWithFormat: @"%@ AND", searchString];
-                      searchString = [NSString stringWithFormat: @"%@ (flags = '%@')", 
-                                        searchString, 
-                                        [[flags objectAtIndex: j] stringByReplacingOccurrencesOfString: @"_$" withString:@"$"]];
-                    }
-                    searchString = [NSString stringWithFormat: @"%@)", searchString];
-                  } else {
-                    searchString = [NSString stringWithFormat: @"(size > 0)"];
-                  }
-                } else {
-                  // Others
-                  searchString = [NSString stringWithFormat: @"(%@ doesContain: '%@')", searchBy, searchInput];
+        {
+          filter = [filters objectAtIndex:i];
+          searchBy = [filter objectForKey: @"searchBy"];
+          searchInput = [filter objectForKey: @"searchInput"];
+          
+          if (searchBy && searchInput)
+            {
+              // Size
+              if ([searchBy isEqualToString: @"size"]) {
+                operator = [filter objectForKey: @"operator"];
+                sizeUnit = [filter objectForKey: @"sizeUnit"];
+                formatter = [[NSNumberFormatter alloc] init];
+                formatter.numberStyle = NSNumberFormatterDecimalStyle;
+                size = [formatter numberFromString: searchInput];
+                [formatter release];
+                if ([[sizeUnit lowercaseString] isEqualToString: @"kb"]) {
+                  size = [NSNumber numberWithLongLong: [size longLongValue] * 1024];
+                } else if ([[sizeUnit lowercaseString] isEqualToString: @"mb"]) {
+                  size = [NSNumber numberWithLongLong: [size longLongValue]  * 1024 * 1024];
+                } else if ([[sizeUnit lowercaseString] isEqualToString: @"gb"]) {
+                  size = [NSNumber numberWithLongLong: [size longLongValue] * 1024 * 1024 * 1024];
                 }
-
-                if ([[filter objectForKey: @"negative"] boolValue])
-                  searchString = [NSString stringWithFormat: @"(not %@)", searchString];
                 
+                searchString = [NSString stringWithFormat: @"(%@ %@ %@)", searchBy, operator, [size stringValue]];
+              } else if ([searchBy isEqualToString: @"date"]) {
+                // Date
+                operator = [filter objectForKey: @"operator"];
+                searchString = [NSString stringWithFormat: @"(%@ %@ (NSCalendarDate)\"%@\")", searchBy, operator, searchInput];
+              } else if ([searchBy isEqualToString: @"date_between"]) {
+                // Date between
+                dateFrom = [filter objectForKey: @"dateFrom"];
+                dateTo = [filter objectForKey: @"dateTo"];
+                searchString = [NSString stringWithFormat: @"(date >= (NSCalendarDate)\"%@\" AND date <= (NSCalendarDate)\"%@\")", dateFrom, dateTo];
+              } else if ([searchBy isEqualToString: @"attachment"]) {
+                // Attachment
+                // Not possible with imap search, check in getUIDsInFolder method
+                // The attachments must be checked in headers
+              } else if ([searchBy isEqualToString: @"favorite"]) {
+                // Favorite
+                flaggedOnly = YES;
+              } else if ([searchBy isEqualToString: @"unseen"]) {
+                // Unseen
+                unseenOnly = YES;
+              } else if ([searchBy isEqualToString: @"contains"]) {
+                // Contains
+                // Split on space to check each word
+                searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
+                searchInputSplit = [searchInput componentsSeparatedByString:@" "];
+                if ([searchInputSplit count] > 1) {
+                  searchString = @"(";
+                  j = 0;
+                  for (searchInput in searchInputSplit) {
+                    if (j > 0) {
+                      searchString = [NSString stringWithFormat: @"%@ OR", searchString];
+                    }
+                    
+                    searchString = [NSString stringWithFormat: @"%@ (subject doesContain: '%@' OR body doesContain: '%@')", 
+                    searchString, searchInput, searchInput];
+                    j++;
+                  }
+                  searchString = [NSString stringWithFormat: @"%@)", searchString];
+                } else {
+                  searchString = [NSString stringWithFormat: @"(subject doesContain: '%@' OR body doesContain: '%@')", 
+                    searchInput, searchInput];
+                }
+                
+              } else if ([searchBy isEqualToString: @"not_contains"]) {
+                // Not contains
+                searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
+                searchString = [NSString stringWithFormat: @"(NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
+                searchInput, searchInput];
 
+                // Split on space to check each word
+                searchInput = [searchInput stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
+                searchInputSplit = [searchInput componentsSeparatedByString:@" "];
+                if ([searchInputSplit count] > 1) {
+                  searchString = @"(";
+                  j = 0;
+                  for (searchInput in searchInputSplit) {
+                    if (j > 0) {
+                      searchString = [NSString stringWithFormat: @"%@ AND", searchString];
+                    }
+                    
+                    searchString = [NSString stringWithFormat: @"%@ (NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
+                    searchString, searchInput, searchInput];
+                    j++;
+                  }
+                  searchString = [NSString stringWithFormat: @"%@)", searchString];
+                } else {
+                  searchString = [NSString stringWithFormat: @"(NOT (subject doesContain: '%@') AND NOT (body doesContain: '%@'))", 
+                    searchInput, searchInput];
+                }
+                } else if ([searchBy isEqualToString: @"flags"]) {
+                // Flags
+                flags = [filter objectForKey: @"flags"];
+                if (flags && [flags count] > 0) {
+                  searchString = @"(";
+                  
+                  for (j = 0 ; j < [flags count] ; j++) {
+                    if (j > 0)
+                      searchString = [NSString stringWithFormat: @"%@ AND", searchString];
+                    searchString = [NSString stringWithFormat: @"%@ (flags = '%@')", 
+                                      searchString, 
+                                      [[flags objectAtIndex: j] stringByReplacingOccurrencesOfString: @"_$" withString:@"$"]];
+                  }
+                  searchString = [NSString stringWithFormat: @"%@)", searchString];
+                }
+              } else {
+                // Others
+                searchString = [NSString stringWithFormat: @"(%@ doesContain: '%@')", searchBy, searchInput];
+              }
+
+              if ([[filter objectForKey: @"negative"] boolValue])
+                searchString = [NSString stringWithFormat: @"(not %@)", searchString];
+              
+
+              if (searchString && [searchString length] > 0) {
                 searchQualifier = [EOQualifier qualifierWithQualifierFormat: searchString];
                 if (searchQualifier)
                   [searchArray addObject: searchQualifier];
               }
-            else
-              {
-                [self errorWithFormat: @"Missing parameters in search filter: %@", filter];
-              }
-          }
-        sortingAttributes = [content objectForKey: @"sortingAttributes"];
-        if (sortingAttributes)
-          match = [sortingAttributes objectForKey: @"match"]; // AND, OR
-        if ([match isEqualToString: @"OR"])
-          qualifier = [[EOOrQualifier alloc] initWithQualifierArray: searchArray];
-        else
-          qualifier = [[EOAndQualifier alloc] initWithQualifierArray: searchArray];
-        [qualifier autorelease];
-        [qualifiers addObject: qualifier];
+            }
+          else
+            {
+              [self errorWithFormat: @"Missing parameters in search filter: %@", filter];
+            }
+        }
+
+        if ([searchArray count] > 0) {
+          sortingAttributes = [content objectForKey: @"sortingAttributes"];
+          if (sortingAttributes)
+            match = [sortingAttributes objectForKey: @"match"]; // AND, OR
+          if ([match isEqualToString: @"OR"])
+            qualifier = [[EOOrQualifier alloc] initWithQualifierArray: searchArray];
+          else
+            qualifier = [[EOAndQualifier alloc] initWithQualifierArray: searchArray];
+          [qualifier autorelease];
+          [qualifiers addObject: qualifier];
+        }
       }
     }
 

@@ -10,7 +10,7 @@
                 ng-hide="app.service.$virtualPath === false || mailbox.mode.multiple">
        <div class="md-toolbar-tools sg-toolbar-auto advanced-search">
 
-         <md-input-container class="advanced-search-full  advanced-search-more">
+         <md-input-container class="advanced-search-full advanced-search-more advanced-search-more-no-bottom">
             <div>
               <label><var:string label:value="From"/></label>
               <input type="text" var:value="app.searchForm.from" ng-model="app.searchForm.from" ng-keyup="app.searchFieldChange($event)" />
@@ -566,13 +566,13 @@
                 </md-select>
                 <md-select ng-model="dialogCtrl.mainController.searchForm.sizeUnit" class="search-right-space">
                     <md-option value="kb">
-                      <var:string label:value="Kb"/>
+                      <var:string label:value="KiB"/>
                     </md-option>
                     <md-option value="mb">
-                      <var:string label:value="Mb"/>
+                      <var:string label:value="MiB"/>
                     </md-option>
                     <md-option value="gb">
-                      <var:string label:value="Gb"/>
+                      <var:string label:value="GiB"/>
                     </md-option>
                 </md-select>
               </div>

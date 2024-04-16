@@ -500,12 +500,7 @@
           parts[i].content = dom.innerHTML;
           dom.remove();
           // Title
-          dom = document.createElement("DIV");
-          dom.innerHTML = this.subject;
-          markInstance = new Mark(dom);
-          markInstance.mark(this.$mailbox.getHighlightWords());
-          this.subject = dom.innerHTML;
-          dom.remove();
+          this.subject = this.getHighlightSubject();
         }
       }
     }
@@ -514,6 +509,26 @@
     this.$parts = parts;
 
     return parts;
+  };
+
+  /**
+   * @function getHighlightSubject
+   * @memberof Message.prototype
+   * @desc Returns the subject with highlight search
+   * @returns the subject with highlighted search terms
+   */
+  Message.prototype.getHighlightSubject = function () {
+    var subject = this.subject;
+    if (this.$mailbox.getHighlightWords() && this.$mailbox.getHighlightWords().length > 0) {
+      var dom = document.createElement("DIV");
+      dom.innerHTML = subject;
+      var markInstance = new Mark(dom);
+      markInstance.mark(this.$mailbox.getHighlightWords());
+      subject = dom.innerHTML;
+      dom.remove();
+    }
+   
+    return subject;
   };
 
   /**
