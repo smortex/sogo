@@ -496,6 +496,11 @@ _injectConfigurationFromFile (NSMutableDictionary *defaultsDict,
   return [self boolForKey: @"SOGoEASDebugEnabled"];
 }
 
+- (BOOL) apiDebugEnabled
+{
+  return [self boolForKey: @"SOGoAPIDebugEnabled"];
+}
+
 - (BOOL) tnefDecoderDebugEnabled
 {
   return [self boolForKey: @"SOGoTnefDecoderDebugEnabled"];
