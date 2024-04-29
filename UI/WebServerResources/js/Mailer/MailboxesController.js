@@ -403,6 +403,8 @@
       // Close sidenav on small devices
       if (!$mdMedia(sgConstant['gt-md']))
         $mdSidenav('left').close();
+
+      this.showAdditionalParameters();
     };
 
     this.newFolder = function(parentFolder) {

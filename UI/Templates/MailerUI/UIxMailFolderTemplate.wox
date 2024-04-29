@@ -5,99 +5,8 @@
     xmlns:label="OGo:label">
     
   <div class="view-list hide-print" layout="column" ng-class="{'view-list--close': mailbox.centerIsClose(centerIsClose)}">
-    <!-- in virtual mailbox mode -->
-    <md-toolbar class="md-whiteframe-z1 md-hue-3"
-                ng-hide="app.service.$virtualPath === false || mailbox.mode.multiple">
-       <div class="md-toolbar-tools sg-toolbar-auto advanced-search">
-
-         <md-input-container class="advanced-search-full advanced-search-more advanced-search-more-no-bottom">
-            <div>
-              <label><var:string label:value="From"/></label>
-              <input type="text" var:value="app.searchForm.from" ng-model="app.searchForm.from" ng-keyup="app.searchFieldChange($event)" />
-            </div>
-            <div>
-              <md-button type="button" class="sg-icon-button" ng-click="app.hideAdvancedSearch()">
-                <md-icon>close</md-icon>
-              </md-button>
-            </div>
-          </md-input-container>
-
-          <md-input-container class="advanced-search-full">
-            <label><var:string label:value="To"/></label>
-            <input type="text" var:value="app.searchForm.to"  ng-model="app.searchForm.to" ng-keyup="app.searchFieldChange($event)"/>
-          </md-input-container>
-
-          <md-input-container class="advanced-search-full advanced-search-more">
-            <div>
-              <label><var:string label:value="Contains"/></label>
-              <input type="text" var:value="app.searchForm.contains" ng-model="app.searchForm.contains" ng-keyup="app.searchFieldChange($event)" />
-            </div>
-            <div>
-              <md-button class="sg-icon-button" label:aria-label="Show more"
-                   ng-click="app.showAdditionalParameters()">
-                <md-icon>add_circle</md-icon>
-              </md-button>
-            </div>
-          </md-input-container>
-        
-          <div class="search-inline advanced-search-full"
-                ng-hide="mailbox.service.$virtualPath === false || mailbox.mode.multiple">
-     
-              <div class="pseudo-input-container pseudo-input-container--compact md-flex sg-no-wrap">
-                <label class="pseudo-input-label pseudo-input-label">
-                  <var:string label:value="Search messages in"/>
-                </label>
-                <md-select class="pseudo-input-field" label:aria-label="Search messages in" ng-model="mailbox.service.$virtualPath">
-                  <md-option ng-value="''">
-                    <span ng-bind="app.accounts[0].name"><!-- main account name --></span>
-                  </md-option>
-                  <md-option ng-repeat="folder in
-                                        app.accounts[0].$flattenMailboxes()
-                                        track by folder.path"
-                            ng-value="folder.path">
-                    <span ng-class="'sg-child-level-' + folder.level"
-                          ng-bind="folder.$displayName"><!-- mailbox name --></span>
-                  </md-option>
-                </md-select>
-              </div>
-              <md-menu>
-                <md-button class="sg-icon-button" label:aria-label="More search options" ng-click="$mdMenu.open()">
-                  <md-icon>settings</md-icon>
-                </md-button>
-                <md-menu-content>
-                  <md-menu-item>
-                    <sg-checkmark ng-model="app.search.subfolders"
-                                  sg-true-value="1"
-                                  sg-false-value="0">
-                      <var:string label:value="Search subfolders"/>
-                    </sg-checkmark>
-                  </md-menu-item>
-                  <md-menu-divider><!-- divider --></md-menu-divider>
-                  <md-menu-item>
-                    <md-button ng-click="app.search.match='AND'">
-                      <md-icon label:aria-label="Match all of the following">{{ app.search.match == 'AND' ? 'check' : null }}</md-icon>
-                      <var:string label:value="Match all of the following"/>
-                    </md-button>
-                  </md-menu-item>
-                  <md-menu-item>
-                    <md-button ng-click="app.search.match='OR'">
-                      <md-icon label:aria-label="Match any of the following">{{ app.search.match == 'OR' ? 'check' : null }}</md-icon>
-                      <var:string label:value="Match any of the following"/>
-                    </md-button>
-                  </md-menu-item>
-                </md-menu-content>
-              </md-menu>
-              <md-button class="sg-icon-button"
-                        label:aria-label="Search"
-                        ng-click="app.addSearchParameters()">
-                <md-icon>{{ app.service.selectedFolder.$isLoading ? 'stop' : 'search' }}</md-icon>
-              </md-button>
-          </div>
-      </div>
-    </md-toolbar>
     <!-- single-selection toolbars -->
-    <md-toolbar class="md-accent md-hue-1"
-                ng-hide="mailbox.service.$virtualPath !== false || mailbox.mode.multiple">
+    <md-toolbar class="md-accent md-hue-1">
       <!-- sort mode (default) -->
       <div class="md-toolbar-tools" ng-hide="mailbox.mode.search">
         <md-button class="sg-icon-button" label:aria-label="Search"
@@ -218,7 +127,7 @@
           </md-select>
         </md-input-container>
         <a class="sg-icon-button show-advanced-search" ng-click="app.showAdvancedSearch()" aria-label="Advanced search">
-          <md-icon>more</md-icon>
+          <md-icon>more_horiz</md-icon>
           <md-tooltip><var:string label:value="Advanced search"/></md-tooltip>
         </a>
       </form>

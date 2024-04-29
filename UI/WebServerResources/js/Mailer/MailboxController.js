@@ -50,10 +50,10 @@
         _.forEach(hotkeys, function(key) {
           sgHotkeys.deregisterHotkey(key);
         });
-        if (vm.mode.search) {
-          vm.mode.search = false;
-          vm.selectedFolder.$reset({ filter: true });
-        }
+        // if (vm.mode.search) {
+        //   vm.mode.search = false;
+        //   vm.selectedFolder.$reset({ filter: true });
+        // }
       });
 
       // Update window's title with unseen messages count of selected mailbox
@@ -181,14 +181,14 @@
           mailbox.setHighlightWords([]);
         });
       }
-      vm.mode.search = false;
-      vm.selectedFolder.$filter(vm.service.$query).then(function() {
-        if (vm.selectedFolder.$selectedMessage) {
-          $timeout(function() {
-            vm.selectedFolder.$topIndex = vm.selectedFolder.uidsMap[vm.selectedFolder.$selectedMessage];
-          });
-        }
-      });
+      // vm.mode.search = false;
+      // vm.selectedFolder.$filter(vm.service.$query).then(function() {
+      //   if (vm.selectedFolder.$selectedMessage) {
+      //     $timeout(function() {
+      //       vm.selectedFolder.$topIndex = vm.selectedFolder.uidsMap[vm.selectedFolder.$selectedMessage];
+      //     });
+      //   }
+      // });
     };
 
     this.composeWindowEnabled = function() {

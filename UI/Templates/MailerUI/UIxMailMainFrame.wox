@@ -123,8 +123,7 @@
 
   <script type="text/ng-template" id="UIxMailFolderTemplate">
   
-    <md-toolbar layout="row" layout-align="space-between center" class="toolbar-main"
-                ng-hide="app.service.$virtualPath !== false">
+    <md-toolbar layout="row" layout-align="space-between center" class="toolbar-main">
       <var:component className="UIxTopnavToolbar"/>
     </md-toolbar>
 
