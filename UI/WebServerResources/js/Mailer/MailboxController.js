@@ -181,14 +181,14 @@
           mailbox.setHighlightWords([]);
         });
       }
-      // vm.mode.search = false;
-      // vm.selectedFolder.$filter(vm.service.$query).then(function() {
-      //   if (vm.selectedFolder.$selectedMessage) {
-      //     $timeout(function() {
-      //       vm.selectedFolder.$topIndex = vm.selectedFolder.uidsMap[vm.selectedFolder.$selectedMessage];
-      //     });
-      //   }
-      // });
+      vm.mode.search = false;
+      vm.selectedFolder.$filter(vm.service.$query).then(function() {
+        if (vm.selectedFolder.$selectedMessage) {
+          $timeout(function() {
+            vm.selectedFolder.$topIndex = vm.selectedFolder.uidsMap[vm.selectedFolder.$selectedMessage];
+          });
+        }
+      });
     };
 
     this.composeWindowEnabled = function() {

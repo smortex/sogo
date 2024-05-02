@@ -6,8 +6,8 @@
   /**
    * @ngInject
    */
-  MailboxesController.$inject = ['$scope', '$state', '$transitions', '$timeout', '$window', '$mdUtil', '$mdMedia', '$mdSidenav', '$mdDialog', '$mdToast', 'sgConstant', 'sgFocus', 'encodeUriFilter', 'Dialog', 'sgSettings', 'sgHotkeys', 'Account', 'Mailbox', 'VirtualMailbox', 'User', 'Preferences', 'stateAccounts', 'Message'];
-  function MailboxesController($scope, $state, $transitions, $timeout, $window, $mdUtil, $mdMedia, $mdSidenav, $mdDialog, $mdToast, sgConstant, focus, encodeUriFilter, Dialog, Settings, sgHotkeys, Account, Mailbox, VirtualMailbox, User, Preferences, stateAccounts, Message) {
+  MailboxesController.$inject = ['$scope', '$rootScope', '$state', '$transitions', '$timeout', '$window', '$mdUtil', '$mdMedia', '$mdSidenav', '$mdDialog', '$mdToast', 'sgConstant', 'sgFocus', 'encodeUriFilter', 'Dialog', 'sgSettings', 'sgHotkeys', 'Account', 'Mailbox', 'VirtualMailbox', 'User', 'Preferences', 'stateAccounts', 'Message'];
+  function MailboxesController($scope, $rootScope, $state, $transitions, $timeout, $window, $mdUtil, $mdMedia, $mdSidenav, $mdDialog, $mdToast, sgConstant, focus, encodeUriFilter, Dialog, Settings, sgHotkeys, Account, Mailbox, VirtualMailbox, User, Preferences, stateAccounts, Message) {
     var vm = this,
         account,
         mailbox,
@@ -21,6 +21,7 @@
       this.service = Mailbox;
       this.accounts = stateAccounts;
       this.message = Message;
+      this.advancedSearchPanelVisible = false;
 
       // Advanced search options
       this.searchForm = {
@@ -63,6 +64,10 @@
           sgHotkeys.deregisterHotkey(key);
         });
       });
+
+      $rootScope.$on('showMailAdvancedSearchPanel', function () {
+        vm.showAdvancedSearch();
+      });
     };
 
 
@@ -87,36 +92,6 @@
         sgHotkeys.registerHotkey(key);
       });
     }
-
-    this.showAdditionalParameters = function() {
-      $mdDialog.show({
-        template: document.getElementById('advancedSearch').innerHTML,
-        parent: angular.element(document.body),
-        controller: function () {
-          var dialogCtrl = this;
-
-          this.$onInit = function () {
-            // Pass main controller
-            this.mainController = vm;
-            this.mailbox = Mailbox;
-            this.message = Message;
-          };
-
-          dialogCtrl.closeDialog = function () {
-            $mdDialog.hide();
-          };
-
-          dialogCtrl.search = function () {
-            this.mainController.addSearchParameters();
-            $mdDialog.hide();
-          };
-        },
-        controllerAs: 'dialogCtrl',
-        clickOutsideToClose: true,
-        escapeToClose: true,
-      });
-    };
-
     this.hideAdvancedSearch = function() {
       vm.service.$virtualPath = false;
       vm.service.$virtualMode = false;
@@ -396,15 +371,45 @@
     };
     
     this.showAdvancedSearch = function() {
-      if (Mailbox.selectedFolder.path)
-        Mailbox.$virtualPath = Mailbox.selectedFolder.path;
-      else
-        Mailbox.$virtualPath = '';
-      // Close sidenav on small devices
-      if (!$mdMedia(sgConstant['gt-md']))
-        $mdSidenav('left').close();
+      if (!vm.advancedSearchPanelVisible) {
+        vm.advancedSearchPanelVisible = true;
+        if (Mailbox.selectedFolder.path)
+          Mailbox.$virtualPath = Mailbox.selectedFolder.path;
+        else
+          Mailbox.$virtualPath = '';
+        // Close sidenav on small devices
+        if (!$mdMedia(sgConstant['gt-md']))
+          $mdSidenav('left').close();
 
-      this.showAdditionalParameters();
+        $mdDialog.show({
+          template: document.getElementById('advancedSearch').innerHTML,
+          parent: angular.element(document.body),
+          controller: function () {
+            var dialogCtrl = this;
+
+            this.$onInit = function () {
+              // Pass main controller
+              this.mainController = vm;
+              this.mailbox = Mailbox;
+              this.message = Message;
+            };
+
+            dialogCtrl.closeDialog = function () {
+              $mdDialog.hide();
+              vm.advancedSearchPanelVisible = false;
+            };
+
+            dialogCtrl.search = function () {
+              this.mainController.addSearchParameters();
+              $mdDialog.hide();
+              vm.advancedSearchPanelVisible = false;
+            };
+          },
+          controllerAs: 'dialogCtrl',
+          clickOutsideToClose: true,
+          escapeToClose: true,
+        });
+      }
     };
 
     this.newFolder = function(parentFolder) {

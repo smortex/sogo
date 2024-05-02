@@ -53,8 +53,8 @@
   /**
    * @ngInject
    */
-  sgMailboxListItemController.$inject = ['$scope', '$element', '$state', '$timeout', '$mdToast', '$mdPanel', '$mdMedia', '$mdSidenav', 'sgConstant', 'Dialog', 'Mailbox', 'encodeUriFilter'];
-  function sgMailboxListItemController($scope, $element, $state, $timeout, $mdToast, $mdPanel, $mdMedia, $mdSidenav, sgConstant, Dialog, Mailbox, encodeUriFilter) {
+  sgMailboxListItemController.$inject = ['$scope', '$rootScope', '$element', '$state', '$timeout', '$mdToast', '$mdPanel', '$mdMedia', '$mdSidenav', 'sgConstant', 'Dialog', 'Mailbox', 'encodeUriFilter'];
+  function sgMailboxListItemController($scope, $rootScope, $element, $state, $timeout, $mdToast, $mdPanel, $mdMedia, $mdSidenav, sgConstant, Dialog, Mailbox, encodeUriFilter) {
     var $ctrl = this;
 
 
@@ -283,6 +283,8 @@
           // Close sidenav on small devices
           if (!$mdMedia(sgConstant['gt-md']))
             $mdSidenav('left').close();
+
+          $rootScope.$broadcast('showMailAdvancedSearchPanel'); // Show advanced search panel (broadcast event to MailboxesController)
         };
 
         this.share = function() {
