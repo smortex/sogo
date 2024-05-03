@@ -1008,11 +1008,9 @@
   noHeaders = [[[requestContent objectForKey: @"sortingAttributes"] objectForKey: @"noHeaders"] boolValue];
   
   if ([[folder nameInContainer] isEqualToString: @"folderOther_SP_Users"]) {
-    NSArray *tmpArr = [NSArray array];
-    NSDictionary *tmp = [NSDictionary dictionaryWithObject:tmpArr forKey:@"mailboxes"];
-
+    // When the folder is folderOther_SP_Users (shared main folder), return no mailboxes
     return response = [self responseWithStatus: 200
-                    andJSONRepresentation: tmp];
+                    andJSONRepresentation: [NSDictionary dictionaryWithObject: [NSArray array] forKey:@"mailboxes"]];
   }
   
   onlyAttachments = NO;
