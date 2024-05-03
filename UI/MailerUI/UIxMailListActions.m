@@ -1007,6 +1007,13 @@
   
   noHeaders = [[[requestContent objectForKey: @"sortingAttributes"] objectForKey: @"noHeaders"] boolValue];
   
+  if ([[folder nameInContainer] isEqualToString: @"folderOther_SP_Users"]) {
+    NSArray *tmpArr = [NSArray array];
+    NSDictionary *tmp = [NSDictionary dictionaryWithObject:tmpArr forKey:@"mailboxes"];
+
+    return response = [self responseWithStatus: 200
+                    andJSONRepresentation: tmp];
+  }
   
   onlyAttachments = NO;
   if (requestContent 

@@ -92,7 +92,7 @@
         sgHotkeys.registerHotkey(key);
       });
     }
-    this.hideAdvancedSearch = function() {
+    this.hideAdvancedSearch = function(e) {
       vm.service.$virtualPath = false;
       vm.service.$virtualMode = false;
 
@@ -112,6 +112,7 @@
           vm.$onInit(); // Reinit search fields
         });
       }
+      e.stopPropagation();
     };
 
     this.addHighlightWords = function(sentence) {
@@ -226,6 +227,7 @@
       if (13 == event.keyCode) {
         this.addSearchParameters();
         $mdDialog.hide();
+        vm.advancedSearchPanelVisible = false;
       } 
     };
 
@@ -406,8 +408,8 @@
             };
           },
           controllerAs: 'dialogCtrl',
-          clickOutsideToClose: true,
-          escapeToClose: true,
+          clickOutsideToClose: false,
+          escapeToClose: false,
         });
       }
     };

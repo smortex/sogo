@@ -6,11 +6,13 @@
     
   <div class="view-list hide-print" layout="column" ng-class="{'view-list--close': mailbox.centerIsClose(centerIsClose)}">
      <!-- in virtual mailbox mode -->
-    <md-toolbar class="md-whiteframe-z1 md-hue-3"
-                ng-hide="app.service.$virtualPath === false || mailbox.mode.multiple">
+    <md-toolbar class="md-whiteframe-z1 md-hue-2 _md _md-toolbar-transitions advanced-search-clickable-toolbar"
+                ng-hide="app.service.$virtualPath === false || mailbox.mode.multiple"
+                ng-click="app.showAdvancedSearch()">
+      <md-icon class="material-icons sg-icon-toolbar-bg">search</md-icon>
       <div class="sg-toolbar-auto">
        <form class="md-toolbar-tools sg-toolbar-secondary" layout="row">
-          <a class="sg-icon-button show-advanced-search-back" ng-click="app.hideAdvancedSearch()" aria-label="Back">
+          <a class="sg-icon-button" ng-click="app.hideAdvancedSearch($event)" aria-label="Back">
             <md-icon>arrow_back</md-icon>
           </a>
           <md-input-container class="md-flex" md-no-float="md-no-float">
