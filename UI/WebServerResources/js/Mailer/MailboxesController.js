@@ -24,26 +24,7 @@
       this.advancedSearchPanelVisible = false;
 
       // Advanced search options
-      this.searchForm = {
-        from: '',
-        to: '',
-        contains: '',
-        notContains: '',
-        subject: '',
-        body: '',
-        date: 'anytime',
-        dateStart: new Date(),
-        dateEnd: new Date(),
-        bcc: '',
-        size: '',
-        sizeOperator: '>',
-        sizeUnit: 'mb',
-        attachements: 0,
-        favorite: 0,
-        unseen: 0,
-        tags: { searchText: '', selected: '' },
-        flags: [],
-      };
+      this.reset();
 
       this.search = {
         subfolders: 1,
@@ -83,6 +64,13 @@
                 !Mailbox.selectedFolder.hasSelectedMessage() &&
                 Mailbox.selectedFolder.$selectedCount() === 0)
               Mailbox.selectedFolderController.confirmDelete(Mailbox.selectedFolder);
+          }
+        }));
+        keys.push(sgHotkeys.createHotkey({
+          key: 'shift+s',
+          description: l('Advanced search'),
+          callback: function () {
+           vm.showAdvancedSearch();
           }
         }));
       });
@@ -125,6 +113,29 @@
         }
       });
     };
+
+    this.reset = function() {
+      this.searchForm = {
+        from: '',
+        to: '',
+        contains: '',
+        notContains: '',
+        subject: '',
+        body: '',
+        date: 'anytime',
+        dateStart: new Date(),
+        dateEnd: new Date(),
+        bcc: '',
+        size: '',
+        sizeOperator: '>',
+        sizeUnit: 'mb',
+        attachements: 0,
+        favorite: 0,
+        unseen: 0,
+        tags: { searchText: '', selected: '' },
+        flags: [],
+      };
+    }
 
     this.addSearchParameters = function() {
       this.search.params = [];
@@ -377,8 +388,7 @@
         vm.advancedSearchPanelVisible = true;
         if (Mailbox.selectedFolder.path)
           Mailbox.$virtualPath = Mailbox.selectedFolder.path;
-        else
-          Mailbox.$virtualPath = '';
+
         // Close sidenav on small devices
         if (!$mdMedia(sgConstant['gt-md']))
           $mdSidenav('left').close();

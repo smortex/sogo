@@ -507,6 +507,18 @@ mark {
   cursor: pointer;
 }
 
+.advanced-search-clickable-toolbar form {
+  padding-left: 0!important;
+}
+
+.advanced-search-clickable-toolbar form >div:first-child {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 16px;
+}
+
 .advanced-search-more button {
   margin-right: 0!important;
 }

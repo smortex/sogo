@@ -45,6 +45,7 @@
       $refreshTimeout: null,
       $virtualMode: false,
       $virtualPath: false,
+      $searchMode: false,
       PRELOAD: PRELOAD,
       BATCH_DELETE_LIMIT: BATCH_DELETE_LIMIT
     });
@@ -243,6 +244,16 @@
   Mailbox.prototype.selectFolder = function() {
     if (!Mailbox.$virtualMode)
       Mailbox.selectedFolder = this;
+  };
+
+  /**
+   * @function setSearchMode
+   * @memberof Mailbox.prototype
+   * @desc Set search mode for controller
+   * @param {array} searchMode - a boolean
+   */
+  Mailbox.prototype.setSearchMode = function (searchMode) {
+    Mailbox.$searchMode = searchMode;
   };
 
   /**

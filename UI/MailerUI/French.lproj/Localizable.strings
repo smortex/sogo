@@ -158,6 +158,8 @@
 "In favorites" = "En favori";
 "Unseen only" = "Non lu uniquement";
 "Show more" = "Plus de paramètres";
+"Reset" = "Réinitialiser";
+"Message size" = "Taille du message";
 
 /* Popup "show" */
 "all"     = "Tous";

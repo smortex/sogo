@@ -12,9 +12,11 @@
       <md-icon class="material-icons sg-icon-toolbar-bg">search</md-icon>
       <div class="sg-toolbar-auto">
        <form class="md-toolbar-tools sg-toolbar-secondary" layout="row">
-          <a class="sg-icon-button" ng-click="app.hideAdvancedSearch($event)" aria-label="Back">
-            <md-icon>arrow_back</md-icon>
-          </a>
+          <div ng-click="app.hideAdvancedSearch($event)">
+            <a class="sg-icon-button" ng-click="app.hideAdvancedSearch($event)" aria-label="Back">
+              <md-icon>arrow_back</md-icon>
+            </a>
+          </div>
           <md-input-container class="md-flex" md-no-float="md-no-float">
             <var:string label:value="Advanced search"/>
           </md-input-container>
@@ -484,7 +486,7 @@
 
               <div class="search-inline">
                 <md-input-container class="md-text search-right-space">
-                  <label><var:string label:value="Size"/></label>
+                  <label><var:string label:value="Message size"/></label>
                   <input type="number" var:value="dialogCtrl.mainController.searchForm.size" ng-model="dialogCtrl.mainController.searchForm.size" ng-keyup="dialogCtrl.mainController.searchFieldChange($event)"/>
                 </md-input-container>
 
@@ -610,6 +612,18 @@
         
       </md-dialog-content>
       <md-dialog-actions>
+        <md-button 
+                  class="md-warn"
+                  label:aria-label="Cancel"
+                  ng-click="dialogCtrl.closeDialog()">
+                  <var:string label:value="Cancel"/>
+        </md-button>
+        <md-button 
+                  label:aria-label="Reset"
+                  ng-click="dialogCtrl.mainController.reset()">
+                  <var:string label:value="Reset"/>
+        </md-button>
+        <div class="md-flex"><!-- spacer --></div>
         <md-button 
                   label:aria-label="Search"
                   ng-click="dialogCtrl.search()">
