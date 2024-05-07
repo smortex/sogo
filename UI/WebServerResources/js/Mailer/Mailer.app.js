@@ -357,9 +357,10 @@
         // Don't report any state error
       });
     $transitions.onError({ to: 'mail.**' }, function(transition) {
-      if (transition.to().name != 'mail' &&
+      if ((transition.to().name != 'mail' &&
           !transition.ignored() &&
-          transition.error().message.indexOf('superseded') < 0) {
+          transition.error().message.indexOf('superseded') < 0)
+          || transition.to().name === "mail.account.virtualMailbox") {
         $log.error('transition error to ' + transition.to().name + ': ' + transition.error().detail);
         // Unselect everything
         Mailbox.selectedFolder = false;
