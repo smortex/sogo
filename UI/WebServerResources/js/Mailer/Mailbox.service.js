@@ -406,6 +406,8 @@
         if ("subject_or_from" == filter.searchBy
           || "contains" == filter.searchBy
           || "body" == filter.searchBy
+          || "from" == filter.searchBy
+          || "to" == filter.searchBy
           || "subject" == filter.searchBy) {
           var words = filter.searchInput.split(" ");
           words.forEach(word => {

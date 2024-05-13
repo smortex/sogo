@@ -84,10 +84,12 @@
 
 
     this.selectFolder = function($event) {
+      $rootScope.$broadcast('resetMailAdvancedSearchPanel'); // Reset advanced search panel (broadcast event to MailboxesController)
       if (this.editMode || this.mailbox == Mailbox.selectedFolder || this.mailbox.isNoSelect())
         return;
-      Mailbox.$virtualPath = false;
-      if (Mailbox.$virtualMode) {
+      
+      this.mailbox.setHighlightWords([]);
+      if (Mailbox.selectedFolder) {
         Mailbox.$virtualMode = false;
         Mailbox.selectedFolder.$reset({ filter: true });
       }

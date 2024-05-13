@@ -141,11 +141,8 @@
           if ($ctrl.mailboxNameElement)
             $ctrl.mailboxNameElement.innerHTML = $ctrl.message.$mailbox.$displayName;
 
-          // Sender or recipient when in Sent or Draft mailbox
-          if ($ctrl.MailboxService.selectedFolder.isSentFolder || $ctrl.MailboxService.selectedFolder.isDraftsFolder)
-            $ctrl.senderElement.innerHTML = $ctrl.message.$shortAddress('to', Preferences.defaults.SOGoMailDisplayFullEmail).encodeEntities();
-          else
-            $ctrl.senderElement.innerHTML = $ctrl.message.$shortAddress('from', Preferences.defaults.SOGoMailDisplayFullEmail).encodeEntities();
+          // Subject and sender or recipient when in Sent or Draft mailbox
+          $ctrl.defineSubjectAndSenderElements();
 
           // Priority icon
           if ($ctrl.message.priority && $ctrl.message.priority.level < 3) {
@@ -168,9 +165,6 @@
           else {
             $ctrl.threadButton.classList.add('ng-hide');
           }
-
-          // Subject
-          $ctrl.subjectElement.innerHTML = $ctrl.message.getHighlightSubject();
 
           // Message size
           $ctrl.sizeElement.innerHTML = $ctrl.message.size;
@@ -196,9 +190,21 @@
       this.MailboxService = Mailbox;
     };
 
-    this.$doCheck = function () {
-      if ($ctrl && $ctrl.message)
+    this.defineSubjectAndSenderElements = function() {
+      if ($ctrl && $ctrl.message) {
+        // Subject
         $ctrl.subjectElement.innerHTML = $ctrl.message.getHighlightSubject();
+
+        // Sender or recipient when in Sent or Draft mailbox
+        if ($ctrl.MailboxService.selectedFolder.isSentFolder || $ctrl.MailboxService.selectedFolder.isDraftsFolder)
+          $ctrl.senderElement.innerHTML = $ctrl.message.highlightSearchTerms($ctrl.message.$shortAddress('to', Preferences.defaults.SOGoMailDisplayFullEmail).encodeEntities());
+        else
+          $ctrl.senderElement.innerHTML = $ctrl.message.highlightSearchTerms($ctrl.message.$shortAddress('from', Preferences.defaults.SOGoMailDisplayFullEmail).encodeEntities());
+      }
+    };
+
+    this.$doCheck = function () {
+      $ctrl.defineSubjectAndSenderElements();
     };
 
     this.toggleThread = function() {

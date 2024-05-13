@@ -360,7 +360,8 @@
       if ((transition.to().name != 'mail' &&
           !transition.ignored() &&
           transition.error().message.indexOf('superseded') < 0)
-          || transition.to().name === "mail.account.virtualMailbox") {
+          || transition.to().name === "mail.account.virtualMailbox"
+          || transition.to().name === "mail.account.virtualMailbox.message") {
         $log.error('transition error to ' + transition.to().name + ': ' + transition.error().detail);
         // Unselect everything
         Mailbox.selectedFolder = false;

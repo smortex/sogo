@@ -49,6 +49,12 @@
       $rootScope.$on('showMailAdvancedSearchPanel', function () {
         vm.showAdvancedSearch();
       });
+
+      $rootScope.$on('resetMailAdvancedSearchPanel', function () {
+        vm.service.$virtualPath = false;
+        vm.service.$virtualMode = false;
+        vm.reset();
+      });
     };
 
 
@@ -115,6 +121,7 @@
     };
 
     this.reset = function() {
+      this.highlightWords = [];
       this.searchForm = {
         from: '',
         to: '',
@@ -143,6 +150,7 @@
       // From
       if (this.searchForm.from && this.searchForm.from.length > 0) {
         this.search.params.push(this.newSearchParam('from', this.searchForm.from));
+        this.addHighlightWords(this.searchForm.from);
       }
       // To
       if (this.searchForm.to && this.searchForm.to.length > 0) {
@@ -284,6 +292,9 @@
           });
         }
 
+        mailboxes.forEach((mailbox) => {
+          mailbox
+        });
         vm.virtualMailbox.setMailboxes(mailboxes);
         vm.virtualMailbox.startSearch(vm.search.match, vm.search.params);
         if ($state.$current.name != 'mail.account.virtualMailbox')

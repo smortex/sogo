@@ -491,16 +491,12 @@
           && parts[i].type
           && ("UIxMailPartHTMLViewer" == parts[i].type
           || "UIxMailPartTextViewer" == parts[i].type)) {
-          
           // Content
-          var dom = document.createElement("DIV");
-          dom.innerHTML = parts[i].content;
-          var markInstance = new Mark(dom);
-          markInstance.mark(this.$mailbox.getHighlightWords());
-          parts[i].content = dom.innerHTML;
-          dom.remove();
+          parts[i].content = this.highlightSearchTerms(parts[i].content);
           // Title
           this.subject = this.getHighlightSubject();
+          // From
+          this.from = this.getHighlightFrom();
         }
       }
     }
@@ -512,23 +508,49 @@
   };
 
   /**
+   * @function highlightSearchTerms
+   * @memberof Message.prototype
+   * @desc Returns the data with highlight search
+   * @returns the data with highlighted search terms
+   */
+  Message.prototype.highlightSearchTerms = function (data) {
+    var i = 0;
+    if (this.$mailbox.getHighlightWords() && this.$mailbox.getHighlightWords().length > 0 && -1 === data.indexOf("data-markjs")) {
+      var dom = document.createElement("DIV");
+      dom.innerHTML = data;
+      var markInstance = new Mark(dom);
+      markInstance.mark(this.$mailbox.getHighlightWords());
+      data = dom.innerHTML;
+      dom.remove();
+    }
+
+    return data;
+  };
+
+  /**
    * @function getHighlightSubject
    * @memberof Message.prototype
    * @desc Returns the subject with highlight search
    * @returns the subject with highlighted search terms
    */
-  Message.prototype.getHighlightSubject = function () {
-    var subject = this.subject;
-    if (this.$mailbox.getHighlightWords() && this.$mailbox.getHighlightWords().length > 0) {
-      var dom = document.createElement("DIV");
-      dom.innerHTML = subject;
-      var markInstance = new Mark(dom);
-      markInstance.mark(this.$mailbox.getHighlightWords());
-      subject = dom.innerHTML;
-      dom.remove();
+  Message.prototype.getHighlightSubject = function () {   
+    return this.highlightSearchTerms(this.subject);
+  };
+
+  /**
+   * @function getHighlightFrom
+   * @memberof Message.prototype
+   * @desc Returns the from with highlight search
+   * @returns the from with highlighted search terms
+   */
+  Message.prototype.getHighlightFrom = function () {
+    var i = 0;
+    for (i = 0; i < this.from.length; i++) {
+      this.from[i].full = this.highlightSearchTerms(this.from[i].full);
+      this.from[i].name = this.highlightSearchTerms(this.from[i].name);
     }
-   
-    return subject;
+
+    return this.from;
   };
 
   /**
