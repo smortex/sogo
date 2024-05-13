@@ -389,6 +389,7 @@
     </md-content>
   </div>
   <script type="text/ng-template" id="advancedSearch">
+    <md-dialog flex="50" flex-sm="80" flex-xs="100">
       <md-toolbar>
         <div class="md-toolbar-tools">
           <md-icon class="material-icons sg-icon-toolbar-bg">search</md-icon>
@@ -401,7 +402,6 @@
         </div>
       </md-toolbar>
       <md-dialog-content class="md-dialog-content">
-        
 
           <div class="md-toolbar-tools sg-toolbar-auto advanced-search">
 
