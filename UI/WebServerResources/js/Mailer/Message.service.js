@@ -515,7 +515,10 @@
    */
   Message.prototype.highlightSearchTerms = function (data) {
     var i = 0;
-    if (this.$mailbox.getHighlightWords() && this.$mailbox.getHighlightWords().length > 0 && -1 === data.indexOf("data-markjs")) {
+    if (this.$mailbox.getHighlightWords() 
+        && this.$mailbox.getHighlightWords().length > 0 
+        && data 
+        && -1 === data.indexOf("data-markjs")) {
       var dom = document.createElement("DIV");
       dom.innerHTML = data;
       var markInstance = new Mark(dom);
