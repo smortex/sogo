@@ -639,6 +639,7 @@
   NSEnumerator *enumerator;
   NSString *currentUID;
   SOGoUser *user, *currentUser;
+  unsigned long long eventStartPeriod, eventEndPeriod;
 
   _resourceHasAutoAccepted = NO;
 
@@ -663,6 +664,12 @@
     }
   
   enumerator = [attendees objectEnumerator];
+
+  // Compute event periods
+  eventStartPeriod = [[[(iCalDateTime *)[theEvent uniqueChildWithTag: @"dtstart"] timeZone] periodForDate: [theEvent startDate]] secondsOffsetFromGMT];
+  eventEndPeriod = [[[(iCalDateTime *)[theEvent uniqueChildWithTag: @"dtend"] timeZone] periodForDate: [theEvent startDate]] secondsOffsetFromGMT];
+
+
   while ((currentUID = [enumerator nextObject]))
     {
       NSCalendarDate *start, *end, *rangeStartDate, *rangeEndDate;
@@ -740,11 +747,12 @@
               // We MUST use the -uniqueChildWithTag method here because the event has been flattened, so its timezone has been
               // modified in SOGoAppointmentFolder: -fixupCycleRecord: ....
               rangeStartDate = [[fbInfo objectAtIndex: i] objectForKey: @"startDate"];
-              delta = [[rangeStartDate timeZoneDetail] timeZoneSecondsFromGMT] - [[[(iCalDateTime *)[theEvent uniqueChildWithTag: @"dtstart"] timeZone] periodForDate: [theEvent startDate]] secondsOffsetFromGMT];
+
+              delta = [[rangeStartDate timeZoneDetail] timeZoneSecondsFromGMT] - eventStartPeriod;
               rangeStartDate = [rangeStartDate dateByAddingYears: 0  months: 0  days: 0  hours: 0  minutes: 0  seconds: delta];
 
               rangeEndDate = [[fbInfo objectAtIndex: i] objectForKey: @"endDate"];
-              delta = [[rangeEndDate timeZoneDetail] timeZoneSecondsFromGMT] - [[[(iCalDateTime *)[theEvent uniqueChildWithTag: @"dtend"] timeZone] periodForDate: [theEvent endDate]] secondsOffsetFromGMT];
+              delta = [[rangeEndDate timeZoneDetail] timeZoneSecondsFromGMT] - eventEndPeriod;
               rangeEndDate = [rangeEndDate dateByAddingYears: 0  months: 0  days: 0  hours: 0  minutes: 0  seconds: delta];
 
               range = [NGCalendarDateRange calendarDateRangeWithStartDate: rangeStartDate
